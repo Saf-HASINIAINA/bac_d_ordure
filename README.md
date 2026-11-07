@@ -14,6 +14,12 @@ intervalle des mesures (30 s par défaut, `--simulation.intervalle-ms=5000` pour
 taux de perte des messages et durée de conservation des mesures (2 jours, purge automatique).
 Attention : le plan gratuit de Supabase est limité à 500 Mo, arrêtez l'application quand vous ne l'utilisez pas.
 
+## Tableau de bord
+Une fois l'application lancée, ouvrir http://localhost:8080/ : carte des bacs (couleur selon le niveau), camions,
+trajet de la tournée choisie, indicateurs, alertes à traiter, planification et suivi des tournées.
+La page se met à jour toute seule toutes les 5 secondes. Le fond de carte OpenStreetMap demande une connexion Internet ;
+le reste fonctionne sans (Leaflet et Chart.js sont embarqués dans `static/vendor/`).
+
 ## Planification des tournées
 Le planificateur retient les bacs remplis à 80 % ou plus (RG2), en commençant par les plus remplis (RG5), sans dépasser
 la capacité du camion (RG3), puis les ordonne avec la stratégie choisie par `tournee.strategie`
@@ -34,6 +40,7 @@ Schéma géré uniquement par les migrations : voir [docs/02_base_de_donnees.md]
 - `service/` alertes (Observer), traitement des mesures, paramètres, cycle de vie des tournées (`TourneeService`)
 - `planification/` planificateur de tournées et stratégies d'optimisation (Strategy : `PlusProcheVoisin`, `PrioriteRemplissage`)
 - `simulation/` moteur de simulation et module de communication simulé
+- `resources/static/` tableau de bord (HTML, CSS, JavaScript sans framework)
 - `api/` contrôleurs REST, DTO et gestion des erreurs
 - `repository/` accès aux données (Spring Data JPA)
 - `config/` données de démonstration

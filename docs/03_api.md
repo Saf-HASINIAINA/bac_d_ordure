@@ -8,6 +8,8 @@ ne pas exposer l'application sur Internet avant l'ajout de Spring Security (proc
 |---|---|---|
 | GET | `/zones` | Zones (quartiers) |
 | GET | `/camions` | Camions, statut, charge, position |
+| GET | `/chauffeurs` | Chauffeurs actifs |
+| GET | `/configuration` | Position du dépôt des camions |
 | GET | `/bacs?zoneId=&etat=` | Bacs, filtrables par zone et état (`VIDE`, `MOYEN`, `PLEIN`, `CRITIQUE`, `HORS_SERVICE`) |
 | GET | `/bacs/{id}` | Détail d'un bac |
 | GET | `/alertes?traitee=false` | Alertes (toutes, ou seulement à traiter / traitées) |
