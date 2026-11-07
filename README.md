@@ -20,6 +20,9 @@ la capacité du camion (RG3), puis les ordonne avec la stratégie choisie par `t
 (`plus-proche-voisin` par défaut, ou `priorite-remplissage`). Le dépôt se règle avec `tournee.depot-latitude/longitude`.
 Cycle d'une tournée : planifier -> démarrer -> confirmer la vidange de chaque bac -> terminer (ou annuler tant qu'elle est planifiée).
 
+## API REST
+Les endpoints (bacs, alertes, tournées, statistiques) sont décrits dans [docs/03_api.md](docs/03_api.md).
+
 ## Tests
 `mvn test` (tests unitaires, sans base de données).
 
@@ -31,5 +34,6 @@ Schéma géré uniquement par les migrations : voir [docs/02_base_de_donnees.md]
 - `service/` alertes (Observer), traitement des mesures, paramètres, cycle de vie des tournées (`TourneeService`)
 - `planification/` planificateur de tournées et stratégies d'optimisation (Strategy : `PlusProcheVoisin`, `PrioriteRemplissage`)
 - `simulation/` moteur de simulation et module de communication simulé
+- `api/` contrôleurs REST, DTO et gestion des erreurs
 - `repository/` accès aux données (Spring Data JPA)
 - `config/` données de démonstration

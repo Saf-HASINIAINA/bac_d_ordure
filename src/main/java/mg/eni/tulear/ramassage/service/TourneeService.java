@@ -55,13 +55,13 @@ public class TourneeService {
     @Transactional
     public Tournee planifier(Long zoneId, Long camionId, Long chauffeurId, Long superviseurId) {
         Zone zone = zoneRepository.findById(zoneId)
-                .orElseThrow(() -> new RegleMetierException("Zone introuvable : " + zoneId));
+                .orElseThrow(() -> new RessourceIntrouvableException("Zone introuvable : " + zoneId));
         Camion camion = camionRepository.findById(camionId)
-                .orElseThrow(() -> new RegleMetierException("Camion introuvable : " + camionId));
+                .orElseThrow(() -> new RessourceIntrouvableException("Camion introuvable : " + camionId));
         Chauffeur chauffeur = utilisateurRepository.findById(chauffeurId)
                 .filter(u -> u instanceof Chauffeur && u.isActif())
                 .map(u -> (Chauffeur) u)
-                .orElseThrow(() -> new RegleMetierException("Chauffeur actif introuvable : " + chauffeurId));
+                .orElseThrow(() -> new RessourceIntrouvableException("Chauffeur actif introuvable : " + chauffeurId));
 
         // RG4 : un camion / un chauffeur = une seule tournée active
         if (camion.getStatut() != StatutCamion.DISPONIBLE
@@ -160,6 +160,6 @@ public class TourneeService {
 
     private Tournee charger(Long id) {
         return tourneeRepository.findById(id)
-                .orElseThrow(() -> new RegleMetierException("Tournée introuvable : " + id));
+                .orElseThrow(() -> new RessourceIntrouvableException("Tournée introuvable : " + id));
     }
 }
