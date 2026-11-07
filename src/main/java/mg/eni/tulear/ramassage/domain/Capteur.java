@@ -1,6 +1,7 @@
 package mg.eni.tulear.ramassage.domain;
 
 import jakarta.persistence.*;
+import mg.eni.tulear.ramassage.domain.enums.TypeCapteur;
 import mg.eni.tulear.ramassage.domain.enums.TypeMesure;
 
 import java.time.Instant;
@@ -29,6 +30,8 @@ public abstract class Capteur {
     protected Capteur() { }
 
     protected Capteur(Bac bac) { this.bac = bac; }
+
+    public abstract TypeCapteur getType();
 
     public Mesure mesurer() { return mesurer(1.0); }
 

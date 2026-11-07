@@ -2,6 +2,7 @@ package mg.eni.tulear.ramassage.service;
 
 import mg.eni.tulear.ramassage.domain.*;
 import mg.eni.tulear.ramassage.domain.enums.TypeAlerte;
+import mg.eni.tulear.ramassage.domain.enums.TypeCapteur;
 import mg.eni.tulear.ramassage.domain.enums.TypeDechet;
 import mg.eni.tulear.ramassage.domain.enums.TypeMesure;
 import mg.eni.tulear.ramassage.repository.AlerteRepository;
@@ -77,5 +78,20 @@ class ServiceAlerteTest {
         service.alerteTraitee(1L, TypeAlerte.BAC_PLEIN);
         service.evaluerMesure(bac, mesure(TypeMesure.NIVEAU, 85), Seuils.parDefaut());
         verify(repository, times(2)).save(any(Alerte.class));
+    }
+
+    @Test
+    void capteurEnPanneCreeUneAlerteEtNotifie() {
+        service.signalerCapteurEnPanne(bac, TypeCapteur.NIVEAU, 42);
+        verify(repository).save(argThat(a -> a.getType() == TypeAlerte.CAPTEUR_PANNE
+                && a.getMessage().contains("NIVEAU") && a.getMessage().contains("42 min")));
+        verify(observateur).notifier(any(Alerte.class));
+    }
+
+    @Test
+    void capteurEnPanneNeCreePasDeDoublonTantQueLAlerteEstOuverte() {
+        service.signalerCapteurEnPanne(bac, TypeCapteur.GAZ, 31);
+        service.signalerCapteurEnPanne(bac, TypeCapteur.GAZ, 32);
+        verify(repository, times(1)).save(any(Alerte.class));
     }
 }

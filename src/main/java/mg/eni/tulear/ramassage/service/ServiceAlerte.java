@@ -5,6 +5,7 @@ import mg.eni.tulear.ramassage.domain.Bac;
 import mg.eni.tulear.ramassage.domain.Mesure;
 import mg.eni.tulear.ramassage.domain.Seuils;
 import mg.eni.tulear.ramassage.domain.enums.TypeAlerte;
+import mg.eni.tulear.ramassage.domain.enums.TypeCapteur;
 import mg.eni.tulear.ramassage.repository.AlerteRepository;
 import org.springframework.stereotype.Service;
 
@@ -56,6 +57,12 @@ public class ServiceAlerte {
             }
             default -> { }
         }
+    }
+
+    /** RG6 : un capteur n'a plus envoyé de mesure depuis trop longtemps. */
+    public void signalerCapteurEnPanne(Bac bac, TypeCapteur type, long minutesSansMesure) {
+        creerSiAbsente(TypeAlerte.CAPTEUR_PANNE, bac,
+                "Capteur %s du bac %s ne répond plus depuis %d min".formatted(type, bac.getCode(), minutesSansMesure));
     }
 
     /** Évite de recréer une alerte tant que la précédente du même type n'est pas traitée. */

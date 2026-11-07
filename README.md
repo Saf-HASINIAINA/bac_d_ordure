@@ -14,6 +14,12 @@ intervalle des mesures (30 s par défaut, `--simulation.intervalle-ms=5000` pour
 taux de perte des messages et durée de conservation des mesures (2 jours, purge automatique).
 Attention : le plan gratuit de Supabase est limité à 500 Mo, arrêtez l'application quand vous ne l'utilisez pas.
 
+## Pannes de capteurs (RG6)
+Un capteur qui n'envoie plus de mesure depuis plus de `delai_capteur_panne_min` minutes (30 par défaut, modifiable dans la
+table `parametre`) déclenche une alerte « Capteur en panne », une seule par bac tant qu'elle n'est pas traitée.
+La simulation provoque de temps en temps de fausses pannes (`simulation.taux-panne`, `simulation.duree-panne-ticks`).
+Pour la démonstration : `--simulation.taux-panne=0.01 --simulation.duree-panne-ticks=400` et un délai court dans `parametre`.
+
 ## Connexion
 Le tableau de bord est protégé : ouvrir http://localhost:8080/ renvoie vers la page de connexion. Les comptes de démo
 (`admin@`, `superviseur@`, `chauffeur@tulear.mg`) sont créés avec `--app.init-demo=true`. Un nouveau chauffeur peut
