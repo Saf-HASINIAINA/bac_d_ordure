@@ -76,6 +76,27 @@
       <div class="tournees" id="tournees"></div>
     </section>
 
+    <section class="bloc" id="bloc-rapport" hidden>
+      <h2>Rapport d'activité</h2>
+      <form class="formulaire" id="form-rapport">
+        <label>Du <input type="date" id="rapport-debut" required></label>
+        <label>Au <input type="date" id="rapport-fin" required></label>
+        <button type="submit" class="bouton principal">Afficher</button>
+        <a class="bouton" id="rapport-export" href="#" download>Exporter en CSV</a>
+      </form>
+      <div class="kpis kpis-rapport" id="rapport-kpis"></div>
+      <div class="rapport-grille">
+        <div class="graphique-large"><canvas id="rapport-graphique" aria-label="Tonnage collecté par jour"></canvas></div>
+        <div class="defilement">
+          <table class="tableau">
+            <thead><tr><th>Zone</th><th>Collecté</th><th>Vidanges</th><th>Tournées</th><th>Km</th></tr></thead>
+            <tbody id="rapport-zones"></tbody>
+          </table>
+        </div>
+      </div>
+      <p class="aide" id="rapport-alertes"></p>
+    </section>
+
     <section class="bloc" id="bloc-utilisateurs" hidden>
       <h2>Utilisateurs <span class="compteur" id="nb-attente" title="Comptes inactifs (en attente de validation ou désactivés)">0</span></h2>
       <div class="defilement">

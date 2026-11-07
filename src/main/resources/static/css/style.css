@@ -193,3 +193,13 @@ input {
 @media (max-width: 520px) {
   .deux-colonnes { grid-template-columns: 1fr; }
 }
+
+/* ---------- rapport d'activité ---------- */
+.kpis-rapport { margin: 1rem 0; }
+.rapport-grille { display: grid; grid-template-columns: minmax(0, 2fr) minmax(0, 1fr); gap: 16px; align-items: start; }
+.graphique-large { position: relative; height: 260px; }
+a.bouton { display: inline-block; text-decoration: none; line-height: 1.3; }
+td.vide { text-align: center; padding: 1rem; }
+@media (max-width: 1000px) {
+  .rapport-grille { grid-template-columns: 1fr; }
+}

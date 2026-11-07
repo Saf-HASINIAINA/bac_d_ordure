@@ -23,6 +23,7 @@ actif avec le rôle de son choix.
 | Planifier / annuler une tournée | oui | oui | non |
 | Démarrer, vidanger, terminer une tournée | oui | oui | **les siennes** |
 | Traiter une alerte | oui | oui | non |
+| Consulter les rapports et les exporter | oui | oui | non |
 | Gérer les comptes (lister, créer, activer, désactiver) | oui | non | non |
 
 Les droits sont appliqués **côté serveur** (`SecurityConfig` et `TourneeFacade`) ; masquer un bouton dans la page n'est qu'un confort.

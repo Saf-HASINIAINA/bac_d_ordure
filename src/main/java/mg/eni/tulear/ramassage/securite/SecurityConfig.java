@@ -44,6 +44,7 @@ public class SecurityConfig {
                         "/favicon.ico", "/error").permitAll()
                 .requestMatchers(HttpMethod.POST, "/api/auth/inscription").permitAll()
                 .requestMatchers("/api/utilisateurs/**").hasRole("ADMIN")
+                .requestMatchers("/api/rapports/**").hasAnyRole("ADMIN", "SUPERVISEUR")
                 .requestMatchers(HttpMethod.POST, "/api/tournees", "/api/tournees/*/annuler", "/api/alertes/*/traiter")
                         .hasAnyRole("ADMIN", "SUPERVISEUR")
                 // lecture pour tout utilisateur connecté ; démarrer / vidanger / terminer : propriétaire vérifié dans TourneeFacade
