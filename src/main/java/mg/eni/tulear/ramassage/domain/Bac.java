@@ -10,6 +10,9 @@ import java.time.Instant;
 @Table(name = "bac")
 public class Bac {
 
+    /** Densité moyenne des ordures ménagères (kg par litre), utilisée pour estimer le poids. */
+    public static final double DENSITE_KG_PAR_LITRE = 0.15;
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -76,6 +79,13 @@ public class Bac {
         }
         this.dateDerniereCollecte = Instant.now();
     }
+
+    /** Poids estimé du contenu (volume occupé x densité). */
+    public double estimerPoidsKg() {
+        return niveauPourcent / 100.0 * capaciteLitres * DENSITE_KG_PAR_LITRE;
+    }
+
+    public Position getPosition() { return new Position(latitude, longitude); }
 
     public void setEtat(EtatBac etat) { this.etat = etat; }
 
