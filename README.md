@@ -14,8 +14,14 @@ intervalle des mesures (30 s par défaut, `--simulation.intervalle-ms=5000` pour
 taux de perte des messages et durée de conservation des mesures (2 jours, purge automatique).
 Attention : le plan gratuit de Supabase est limité à 500 Mo, arrêtez l'application quand vous ne l'utilisez pas.
 
+## Connexion
+Le tableau de bord est protégé : ouvrir http://localhost:8080/ renvoie vers la page de connexion. Les comptes de démo
+(`admin@`, `superviseur@`, `chauffeur@tulear.mg`) sont créés avec `--app.init-demo=true`. Un nouveau chauffeur peut
+s'inscrire, un administrateur valide ensuite son compte. Détails, droits par rôle et mot de passe oublié :
+[docs/04_authentification.md](docs/04_authentification.md).
+
 ## Tableau de bord
-Une fois l'application lancée, ouvrir http://localhost:8080/ : carte des bacs (couleur selon le niveau), camions,
+Une fois connecté, http://localhost:8080/ affiche : carte des bacs (couleur selon le niveau), camions,
 trajet de la tournée choisie, indicateurs, alertes à traiter, planification et suivi des tournées.
 La page se met à jour toute seule toutes les 5 secondes. Le fond de carte OpenStreetMap demande une connexion Internet ;
 le reste fonctionne sans (Leaflet et Chart.js sont embarqués dans `static/vendor/`).
@@ -41,6 +47,7 @@ Schéma géré uniquement par les migrations : voir [docs/02_base_de_donnees.md]
 - `planification/` planificateur de tournées et stratégies d'optimisation (Strategy : `PlusProcheVoisin`, `PrioriteRemplissage`)
 - `simulation/` moteur de simulation et module de communication simulé
 - `resources/static/` tableau de bord (HTML, CSS, JavaScript sans framework)
+- `securite/` Spring Security : connexion par session, CSRF, droits par rôle
 - `api/` contrôleurs REST, DTO et gestion des erreurs
 - `repository/` accès aux données (Spring Data JPA)
 - `config/` données de démonstration

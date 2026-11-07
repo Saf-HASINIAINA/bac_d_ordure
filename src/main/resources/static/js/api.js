@@ -5,13 +5,24 @@ export class ErreurApi extends Error {
   }
 }
 
+function jetonCsrf() {
+  const m = document.cookie.match(/(?:^|; )XSRF-TOKEN=([^;]*)/);
+  return m ? decodeURIComponent(m[1]) : '';
+}
+
 async function requete(url, { method = 'GET', corps } = {}) {
   const options = { method, headers: { Accept: 'application/json' } };
+  if (method !== 'GET') options.headers['X-XSRF-TOKEN'] = jetonCsrf();
   if (corps !== undefined) {
     options.headers['Content-Type'] = 'application/json';
     options.body = JSON.stringify(corps);
   }
   const reponse = await fetch(url, options);
+  if (reponse.status === 401) {
+    // session expirée ou absente : retour à la page de connexion
+    location.replace('/login.html');
+    throw new ErreurApi('Session expirée', 401);
+  }
   if (!reponse.ok) {
     let message = `Erreur ${reponse.status}`;
     try {
@@ -27,6 +38,12 @@ async function requete(url, { method = 'GET', corps } = {}) {
 const post = (url) => requete(url, { method: 'POST' });
 
 export const api = {
+  moi: () => requete('/api/auth/moi'),
+  deconnexion: () => post('/api/auth/deconnexion'),
+  utilisateurs: () => requete('/api/utilisateurs'),
+  creerUtilisateur: (corps) => requete('/api/utilisateurs', { method: 'POST', corps }),
+  activer: (id) => post(`/api/utilisateurs/${id}/activer`),
+  desactiver: (id) => post(`/api/utilisateurs/${id}/desactiver`),
   configuration: () => requete('/api/configuration'),
   statistiques: () => requete('/api/statistiques'),
   zones: () => requete('/api/zones'),

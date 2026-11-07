@@ -10,7 +10,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -32,19 +32,25 @@ public class DataInitializer implements CommandLineRunner {
     private final CapteurRepository capteurRepository;
     private final UtilisateurRepository utilisateurRepository;
     private final ParametreService parametreService;
+    private final PasswordEncoder passwordEncoder;
     private final String motDePasseDemo;
+    private final boolean reinitialiserMotsDePasse;
 
     public DataInitializer(ZoneRepository zoneRepository, CamionRepository camionRepository,
                            BacRepository bacRepository, CapteurRepository capteurRepository,
                            UtilisateurRepository utilisateurRepository, ParametreService parametreService,
-                           @Value("${app.demo-password:}") String motDePasseDemo) {
+                           PasswordEncoder passwordEncoder,
+                           @Value("${app.demo-password:}") String motDePasseDemo,
+                           @Value("${app.reset-demo-passwords:false}") boolean reinitialiserMotsDePasse) {
         this.zoneRepository = zoneRepository;
         this.camionRepository = camionRepository;
         this.bacRepository = bacRepository;
         this.capteurRepository = capteurRepository;
         this.utilisateurRepository = utilisateurRepository;
         this.parametreService = parametreService;
+        this.passwordEncoder = passwordEncoder;
         this.motDePasseDemo = motDePasseDemo;
+        this.reinitialiserMotsDePasse = reinitialiserMotsDePasse;
     }
 
     @Override
@@ -54,6 +60,7 @@ public class DataInitializer implements CommandLineRunner {
         if (camionRepository.count() == 0) creerCamions();
         if (bacRepository.count() == 0) creerBacs();
         if (utilisateurRepository.count() == 0) creerUtilisateurs();
+        else if (reinitialiserMotsDePasse) reinitialiserMotsDePasse();
     }
 
     private void creerZones() {
@@ -91,17 +98,29 @@ public class DataInitializer implements CommandLineRunner {
         log.info("Bacs et capteurs de démonstration créés");
     }
 
+    private static final List<String> EMAILS_DEMO = List.of("admin@tulear.mg", "superviseur@tulear.mg", "chauffeur@tulear.mg");
+
+    private String motDePasseDeDemo() {
+        if (!motDePasseDemo.isBlank()) return motDePasseDemo;
+        String genere = UUID.randomUUID().toString().substring(0, 12);
+        log.warn("Mot de passe des comptes de démo (généré, affiché une seule fois) : {}", genere);
+        return genere;
+    }
+
     private void creerUtilisateurs() {
-        String mdp = motDePasseDemo;
-        if (mdp.isBlank()) {
-            mdp = UUID.randomUUID().toString().substring(0, 12);
-            log.warn("Mot de passe des comptes de démo (généré, affiché une seule fois) : {}", mdp);
-        }
-        String hash = new BCryptPasswordEncoder().encode(mdp);
+        String hash = passwordEncoder.encode(motDePasseDeDemo());
         utilisateurRepository.saveAll(List.of(
-                new Administrateur("Admin", "Système", "admin@tulear.mg", hash),
-                new Superviseur("Rakoto", "Jean", "superviseur@tulear.mg", hash),
-                new Chauffeur("Rasoa", "Paul", "chauffeur@tulear.mg", hash, "PERMIS-0001")));
-        log.info("Comptes de démo créés : admin@, superviseur@, chauffeur@tulear.mg");
+                new Administrateur("Admin", "Système", EMAILS_DEMO.get(0), hash),
+                new Superviseur("Rakoto", "Jean", EMAILS_DEMO.get(1), hash),
+                new Chauffeur("Rasoa", "Paul", EMAILS_DEMO.get(2), hash, "PERMIS-0001")));
+        log.info("Comptes de démo créés : {}", EMAILS_DEMO);
+    }
+
+    /** Mot de passe de démo oublié : --app.init-demo=true --app.reset-demo-passwords=true [--app.demo-password=...] */
+    private void reinitialiserMotsDePasse() {
+        String hash = passwordEncoder.encode(motDePasseDeDemo());
+        EMAILS_DEMO.forEach(email -> utilisateurRepository.findByEmailIgnoreCase(email)
+                .ifPresent(u -> u.changerMotDePasse(hash)));
+        log.info("Mots de passe des comptes de démo réinitialisés");
     }
 }

@@ -13,13 +13,22 @@
       <h1>Ramassage des bacs d'ordures</h1>
       <p class="sous-titre">Commune Urbaine de Tuléar · tableau de bord</p>
     </div>
-    <div class="connexion" id="connexion" role="status">
-      <span class="point"></span>
-      <span id="connexion-texte">Connexion…</span>
+    <div class="entete-droite">
+      <div class="connexion" id="connexion" role="status">
+        <span class="point"></span>
+        <span id="connexion-texte">Connexion…</span>
+      </div>
+      <div class="utilisateur" id="utilisateur" hidden>
+        <span id="utilisateur-nom"></span>
+        <span class="badge role" id="utilisateur-role"></span>
+        <button type="button" class="bouton" id="bouton-deconnexion">Se déconnecter</button>
+      </div>
     </div>
   </header>
 
   <main>
+    <p class="message" id="message" role="status" aria-live="polite"></p>
+
     <section class="kpis" aria-label="Indicateurs">
       <div class="kpi"><span class="kpi-valeur" id="kpi-bacs">–</span><span class="kpi-nom">Bacs suivis</span></div>
       <div class="kpi"><span class="kpi-valeur" id="kpi-taux">–</span><span class="kpi-nom">Remplissage moyen</span></div>
@@ -46,7 +55,7 @@
       </aside>
     </div>
 
-    <section class="bloc">
+    <section class="bloc" id="bloc-planification">
       <h2>Planifier une tournée</h2>
       <form class="formulaire" id="form-tournee">
         <label>Zone
@@ -60,12 +69,39 @@
         </label>
         <button type="submit" class="bouton principal">Planifier</button>
       </form>
-      <p class="message" id="message" role="status" aria-live="polite"></p>
     </section>
 
     <section class="bloc">
-      <h2>Tournées</h2>
+      <h2 id="titre-tournees">Tournées</h2>
       <div class="tournees" id="tournees"></div>
+    </section>
+
+    <section class="bloc" id="bloc-utilisateurs" hidden>
+      <h2>Utilisateurs <span class="compteur" id="nb-attente" title="Comptes inactifs (en attente de validation ou désactivés)">0</span></h2>
+      <div class="defilement">
+        <table class="tableau">
+          <thead><tr><th>Nom</th><th>E-mail</th><th>Rôle</th><th>Statut</th><th></th></tr></thead>
+          <tbody id="utilisateurs"></tbody>
+        </table>
+      </div>
+      <details class="creation">
+        <summary>Créer un compte</summary>
+        <form class="formulaire" id="form-utilisateur">
+          <label>Rôle
+            <select id="u-role" required>
+              <option value="CHAUFFEUR">Chauffeur</option>
+              <option value="SUPERVISEUR">Superviseur</option>
+              <option value="ADMIN">Administrateur</option>
+            </select>
+          </label>
+          <label>Nom <input type="text" id="u-nom" maxlength="100" required></label>
+          <label>Prénom <input type="text" id="u-prenom" maxlength="100" required></label>
+          <label>E-mail <input type="email" id="u-email" maxlength="200" required></label>
+          <label id="u-permis-bloc">Numéro de permis <input type="text" id="u-permis" maxlength="50"></label>
+          <label>Mot de passe (8 caractères min.) <input type="password" id="u-mdp" minlength="8" maxlength="72" autocomplete="new-password" required></label>
+          <button type="submit" class="bouton principal">Créer le compte</button>
+        </form>
+      </details>
     </section>
   </main>
 
