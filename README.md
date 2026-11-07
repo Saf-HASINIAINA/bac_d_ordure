@@ -41,6 +41,15 @@ Les endpoints (bacs, alertes, tournées, statistiques) sont décrits dans [docs/
 ## Base de données
 Schéma géré uniquement par les migrations : voir [docs/02_base_de_donnees.md](docs/02_base_de_donnees.md).
 
+## Documentation
+- [docs/01_analyse.md](docs/01_analyse.md) : cahier des charges, besoins, règles de gestion, avancement
+- [docs/02_base_de_donnees.md](docs/02_base_de_donnees.md) : migrations Supabase
+- [docs/03_api.md](docs/03_api.md) : endpoints REST
+- [docs/04_authentification.md](docs/04_authentification.md) : connexion, rôles et droits
+- [docs/05_architecture.md](docs/05_architecture.md) : couches, patterns, traçabilité des règles, limites
+- [docs/06_preparation_soutenance.md](docs/06_preparation_soutenance.md) : plan du rapport et script de démonstration
+- `docs/uml/` : diagrammes PlantUML (sources `.puml`, images dans `docs/uml/images/`)
+
 ## Structure
 - `domain/` entités JPA et logique métier (Bac, Capteur et ses sous-classes, Tournee, ...)
 - `service/` alertes (Observer), traitement des mesures, paramètres, cycle de vie des tournées (`TourneeService`)

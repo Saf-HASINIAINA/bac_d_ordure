@@ -1,49 +1,73 @@
 @startuml sequence_collecte
-title Séquence - De la mesure du capteur à la vidange du bac
+title Séquence - de la mesure du capteur à la vidange du bac
+skinparam shadowing false
 autonumber
 
 participant "MoteurSimulation" as Moteur
-participant "CapteurNiveau" as Capt
+participant "PannesSimulees" as Pannes
+participant "Capteur" as Capt
 participant "ModuleCommunication" as Com
-participant "ServiceMesure" as SM
-participant "Bac" as Bac
+participant "MesureService" as MS
 participant "ServiceAlerte" as SA
-participant "NotificateurWebSocket" as WS
+participant "Observateur(s)" as Obs
+database "PostgreSQL" as DB
 actor Superviseur as Sup
+participant "TourneeFacade /\nTourneeService" as TS
 participant "PlanificateurTournee" as Plan
+participant "StrategieOptimisation" as Strat
 actor Chauffeur as Chauf
-database PostgreSQL as DB
 
-== Mesure et alerte ==
-Moteur -> Capt : mesurer()
-Capt --> Moteur : Mesure(niveau=84%)
-Moteur -> Com : envoyer(mesure)
-Com -> SM : recevoir(mesure)
-SM -> DB : enregistrer(mesure)
-SM -> Bac : mettreAJourNiveau(84)
-SM -> SA : evaluerMesure(bac, mesure)
-alt niveau >= seuil (80%)
-  SA -> DB : enregistrer(Alerte BAC_PLEIN)
-  SA -> WS : notifier(alerte)
-  WS --> Sup : alerte en temps réel
+== Série de mesures (toutes les 30 s) ==
+Moteur -> DB : capteurs actifs avec leur bac (1 requête)
+loop pour chaque capteur
+  Moteur -> Pannes : enPanne(capteur) ?
+  alt capteur en panne
+    Pannes --> Moteur : oui (aucune mesure envoyée)
+  else capteur valide
+    Moteur -> Capt : mesurer(facteurVitesse)
+    Capt --> Moteur : Mesure
+    Moteur -> Com : envoyer() ?
+    Com --> Moteur : reçu (5 % de pertes simulées)
+  end
 end
-
-== Planification ==
-Sup -> Plan : planifier(zone, camion)
-Plan -> DB : bacsACollecter(zone)
-DB --> Plan : liste de bacs
-Plan -> Plan : strategie.calculer(bacs, camion, depot)
-Plan -> DB : enregistrer(Tournee + Collectes)
-Plan --> Sup : Tournee PLANIFIEE
-Sup -> Plan : lancer(tournee)
-
-== Exécution ==
-Chauf -> Plan : consulter sa tournée
-loop pour chaque Collecte dans l'ordre
-  Chauf -> Bac : confirmerCollecte(bac)
-  Bac -> Bac : vider() (niveau = 0)
-  Chauf -> DB : enregistrer(Collecte, poids)
+Moteur -> MS : traiterLot(mesures reçues, seuils)
+loop pour chaque mesure
+  MS -> MS : met à jour le niveau et l'état du bac (RG1)
+  MS -> SA : evaluerMesure(bac, mesure, seuils)
+  alt niveau >= 80 % (RG2) ou gaz élevé
+    SA -> DB : enregistre l'Alerte (une seule par bac tant qu'elle est ouverte)
+    SA -> Obs : notifier(alerte)
+  end
 end
-Chauf -> Plan : terminer(tournee)
-Plan -> DB : statut = TERMINEE
+MS -> DB : insertion groupée des mesures (1 requête)
+
+== Surveillance des capteurs (toutes les minutes, RG6) ==
+participant "SurveillanceCapteurs" as Surv
+Surv -> DB : capteurs actifs avec leur bac
+Surv -> SA : signalerCapteurEnPanne(bac, type, minutes)\nsi aucune mesure depuis plus de N minutes
+SA -> DB : Alerte CAPTEUR_PANNE
+SA -> Obs : notifier(alerte)
+
+== Planification (superviseur ou administrateur) ==
+Sup -> TS : planifier(zone, camion, chauffeur)
+TS -> DB : bacs de la zone hors tournées en cours
+TS -> Plan : planifier(...)
+Plan -> Plan : retient les bacs >= 80 % (RG2),\nles plus remplis d'abord (RG5),\nsans dépasser la capacité du camion (RG3)
+Plan -> Strat : calculer(bacs retenus, camion, depot)
+Strat --> Plan : ordre de passage
+Plan --> TS : Tournée PLANIFIEE (distance dépôt -> bacs -> dépôt)
+TS -> DB : enregistre la tournée et ses collectes
+
+== Exécution (chauffeur concerné) ==
+Chauf -> TS : demarrer(tournée)
+TS -> DB : tournée EN_COURS, camion EN_TOURNEE
+loop pour chaque bac de la tournée
+  Chauf -> TS : confirmerCollecte(tournée, bac)
+  TS -> TS : poids estimé, camion chargé (RG3)
+  TS -> TS : bac vidé : niveau 0 (RG7)
+  TS -> SA : alerteTraitee(bac, BAC_PLEIN)
+  TS -> DB : collecte effectuée, alerte clôturée
+end
+Chauf -> TS : terminer(tournée)
+TS -> DB : tournée TERMINEE, camion déchargé et disponible
 @enduml

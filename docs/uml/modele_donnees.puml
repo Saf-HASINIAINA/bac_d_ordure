@@ -1,0 +1,121 @@
+@startuml modele_donnees
+title Modèle de données (PostgreSQL / Supabase) - 10 tables
+hide circle
+skinparam linetype ortho
+skinparam shadowing false
+skinparam classBackgroundColor #FFFFFF
+
+entity zone {
+  * id : bigint <<PK>>
+  --
+  * nom : text <<unique>>
+  * frequence_collecte_heures : int
+  latitude_centre : double
+  longitude_centre : double
+}
+entity utilisateur {
+  * id : bigint <<PK>>
+  --
+  * nom, prenom : text
+  * email : text <<unique>>
+  * mot_de_passe_hache : text
+  * role : ADMIN | SUPERVISEUR | CHAUFFEUR
+  numero_permis : text  (obligatoire si CHAUFFEUR)
+  * actif : boolean
+}
+entity camion {
+  * id : bigint <<PK>>
+  --
+  * immatriculation : text <<unique>>
+  * capacite_kg : double
+  * charge_actuelle_kg : double
+  * statut : DISPONIBLE | EN_TOURNEE | EN_PANNE
+  latitude, longitude : double
+}
+entity bac {
+  * id : bigint <<PK>>
+  --
+  * code : text <<unique>>
+  * zone_id : bigint <<FK>>
+  * latitude, longitude : double
+  * capacite_litres : double
+  * niveau_pourcent : double (0..100)
+  * type_dechet : MENAGER | RECYCLABLE | ORGANIQUE
+  * etat : VIDE | MOYEN | PLEIN | CRITIQUE | HORS_SERVICE
+  date_derniere_collecte : timestamptz
+}
+entity capteur {
+  * id : bigint <<PK>>
+  --
+  * bac_id : bigint <<FK>>
+  * type : NIVEAU | POIDS | GAZ
+  * actif : boolean
+  derniere_mesure : timestamptz
+}
+entity mesure {
+  * id : bigint <<PK>>
+  --
+  * capteur_id : bigint <<FK>>
+  * type : NIVEAU | POIDS | GAZ | TEMPERATURE
+  * valeur : double
+  * horodatage : timestamptz
+}
+entity tournee {
+  * id : bigint <<PK>>
+  --
+  * date : date
+  * statut : PLANIFIEE | EN_COURS | TERMINEE | ANNULEE
+  * distance_km : double
+  * zone_id : bigint <<FK>>
+  * camion_id : bigint <<FK>>
+  * chauffeur_id : bigint <<FK>>
+  superviseur_id : bigint <<FK>>
+}
+entity collecte {
+  * id : bigint <<PK>>
+  --
+  * tournee_id : bigint <<FK>>
+  * bac_id : bigint <<FK>>
+  * ordre : int
+  poids_collecte_kg : double
+  heure_collecte : timestamptz
+  * effectuee : boolean
+}
+entity alerte {
+  * id : bigint <<PK>>
+  --
+  * type : BAC_PLEIN | RISQUE_INCENDIE | CAPTEUR_PANNE | INCIDENT_CHAUFFEUR
+  * message : text
+  bac_id : bigint <<FK>>
+  * date_creation : timestamptz
+  * traitee : boolean
+}
+entity parametre {
+  * cle : text <<PK>>
+  --
+  * valeur : double
+  description : text
+}
+
+zone ||--o{ bac
+bac ||--|{ capteur
+capteur ||--o{ mesure
+zone ||--o{ tournee
+camion ||--o{ tournee
+utilisateur ||--o{ tournee : chauffeur
+utilisateur |o--o{ tournee : superviseur
+tournee ||--|{ collecte
+bac ||--o{ collecte
+bac |o--o{ alerte
+
+note bottom of tournee
+  Index uniques partiels (RG4) :
+  un camion et un chauffeur ne peuvent
+  avoir qu'une tournée EN_COURS.
+end note
+note bottom of utilisateur
+  Héritage en table unique :
+  la colonne role distingue
+  Administrateur / Superviseur / Chauffeur.
+end note
+@enduml
