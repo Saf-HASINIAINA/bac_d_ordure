@@ -14,6 +14,7 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /** Fait « battre le cœur » de la simulation : chaque tick, tous les capteurs actifs mesurent et transmettent. */
@@ -39,19 +40,23 @@ public class MoteurSimulation {
         this.facteurVitesse = facteurVitesse;
     }
 
-    @Scheduled(fixedDelayString = "${simulation.intervalle-ms:5000}")
+    @Scheduled(initialDelay = 5000, fixedDelayString = "${simulation.intervalle-ms:30000}")
     @Transactional
     public void tick() {
+        long debut = System.currentTimeMillis();
         Seuils seuils = parametreService.chargerSeuils();
-        List<Capteur> capteurs = capteurRepository.findByActifTrue();
-        int transmises = 0;
+        List<Capteur> capteurs = capteurRepository.findActifsAvecBac();
+
+        List<Mesure> recues = new ArrayList<>(capteurs.size());
         for (Capteur capteur : capteurs) {
             Mesure mesure = capteur.mesurer(facteurVitesse);
             if (communication.envoyer()) {
-                mesureService.traiter(capteur, mesure, seuils);
-                transmises++;
+                recues.add(mesure);
             }
         }
-        log.debug("Tick : {}/{} mesures transmises", transmises, capteurs.size());
+        mesureService.traiterLot(recues, seuils);
+
+        log.debug("Tick : {}/{} mesures transmises en {} ms",
+                recues.size(), capteurs.size(), System.currentTimeMillis() - debut);
     }
 }
