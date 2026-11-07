@@ -133,4 +133,16 @@ class ApiControllersTest {
         when(alerteService.traiter(7L)).thenThrow(new RessourceIntrouvableException("Alerte introuvable : 7"));
         mvc.perform(post("/api/alertes/7/traiter")).andExpect(status().isNotFound());
     }
+
+    @Test
+    void chauffeursEtConfiguration() throws Exception {
+        when(consultation.chauffeurs()).thenReturn(List.of(new ChauffeurDto(3L, "Rasoa", "Paul", "PERMIS-0001")));
+        mvc.perform(get("/api/chauffeurs"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$[0].nom").value("Rasoa"));
+        mvc.perform(get("/api/configuration"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.depotLatitude").value(-23.355))
+                .andExpect(jsonPath("$.depotLongitude").value(43.67));
+    }
 }

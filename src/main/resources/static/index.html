@@ -1,0 +1,76 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Ramassage des ordures - Tuléar</title>
+  <link rel="stylesheet" href="vendor/leaflet/leaflet.css">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <header class="entete">
+    <div>
+      <h1>Ramassage des bacs d'ordures</h1>
+      <p class="sous-titre">Commune Urbaine de Tuléar · tableau de bord</p>
+    </div>
+    <div class="connexion" id="connexion" role="status">
+      <span class="point"></span>
+      <span id="connexion-texte">Connexion…</span>
+    </div>
+  </header>
+
+  <main>
+    <section class="kpis" aria-label="Indicateurs">
+      <div class="kpi"><span class="kpi-valeur" id="kpi-bacs">–</span><span class="kpi-nom">Bacs suivis</span></div>
+      <div class="kpi"><span class="kpi-valeur" id="kpi-taux">–</span><span class="kpi-nom">Remplissage moyen</span></div>
+      <div class="kpi"><span class="kpi-valeur" id="kpi-alertes">–</span><span class="kpi-nom">Alertes ouvertes</span></div>
+      <div class="kpi"><span class="kpi-valeur" id="kpi-tournees">–</span><span class="kpi-nom">Tournées en cours</span></div>
+      <div class="kpi"><span class="kpi-valeur" id="kpi-tonnage">–</span><span class="kpi-nom">Collecté</span></div>
+    </section>
+
+    <div class="grille">
+      <section class="bloc bloc-carte" aria-label="Carte des bacs">
+        <div id="carte" role="img" aria-label="Carte des bacs et des camions"></div>
+        <ul class="legende" id="legende"></ul>
+      </section>
+
+      <aside class="colonne">
+        <section class="bloc">
+          <h2>Répartition des bacs</h2>
+          <div class="graphique"><canvas id="graphique" aria-label="Répartition des bacs par état"></canvas></div>
+        </section>
+        <section class="bloc">
+          <h2>Alertes à traiter <span class="compteur" id="nb-alertes">0</span></h2>
+          <ul class="alertes" id="alertes"></ul>
+        </section>
+      </aside>
+    </div>
+
+    <section class="bloc">
+      <h2>Planifier une tournée</h2>
+      <form class="formulaire" id="form-tournee">
+        <label>Zone
+          <select id="champ-zone" required></select>
+        </label>
+        <label>Camion disponible
+          <select id="champ-camion" required></select>
+        </label>
+        <label>Chauffeur
+          <select id="champ-chauffeur" required></select>
+        </label>
+        <button type="submit" class="bouton principal">Planifier</button>
+      </form>
+      <p class="message" id="message" role="status" aria-live="polite"></p>
+    </section>
+
+    <section class="bloc">
+      <h2>Tournées</h2>
+      <div class="tournees" id="tournees"></div>
+    </section>
+  </main>
+
+  <script src="vendor/leaflet/leaflet.js"></script>
+  <script src="vendor/chartjs/chart.umd.js"></script>
+  <script type="module" src="js/app.js"></script>
+</body>
+</html>

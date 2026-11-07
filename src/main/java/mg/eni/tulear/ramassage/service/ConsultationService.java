@@ -22,16 +22,19 @@ public class ConsultationService {
     private final AlerteRepository alerteRepository;
     private final TourneeRepository tourneeRepository;
     private final CollecteRepository collecteRepository;
+    private final ChauffeurRepository chauffeurRepository;
 
     public ConsultationService(BacRepository bacRepository, ZoneRepository zoneRepository,
                                CamionRepository camionRepository, AlerteRepository alerteRepository,
-                               TourneeRepository tourneeRepository, CollecteRepository collecteRepository) {
+                               TourneeRepository tourneeRepository, CollecteRepository collecteRepository,
+                               ChauffeurRepository chauffeurRepository) {
         this.bacRepository = bacRepository;
         this.zoneRepository = zoneRepository;
         this.camionRepository = camionRepository;
         this.alerteRepository = alerteRepository;
         this.tourneeRepository = tourneeRepository;
         this.collecteRepository = collecteRepository;
+        this.chauffeurRepository = chauffeurRepository;
     }
 
     /** @param zoneId et @param etat sont facultatifs */
@@ -55,6 +58,11 @@ public class ConsultationService {
 
     public List<CamionDto> camions() {
         return camionRepository.findAll().stream().map(CamionDto::from).toList();
+    }
+
+    /** Chauffeurs actifs (pour choisir qui conduit une tournée). */
+    public List<ChauffeurDto> chauffeurs() {
+        return chauffeurRepository.findByActifTrueOrderByNom().stream().map(ChauffeurDto::from).toList();
     }
 
     /** @param traitee facultatif : null = toutes, false = à traiter, true = déjà traitées */
