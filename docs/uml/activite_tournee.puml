@@ -1,0 +1,33 @@
+@startuml activite_tournee
+title Activité - Planification et exécution d'une tournée
+start
+:Le superviseur choisit une zone;
+:Charger les bacs de la zone;
+:Filtrer les bacs avec niveau >= seuil\nou alerte active;
+if (Aucun bac à collecter ?) then (oui)
+  :Informer : aucune tournée nécessaire;
+  stop
+else (non)
+endif
+:Sélectionner un camion disponible\net un chauffeur libre;
+:Trier / ordonner les bacs\n(StrategieOptimisation);
+:Ajouter les bacs tant que\npoids estimé <= capacité du camion;
+:Créer la tournée (PLANIFIEE);
+:Le superviseur valide et lance;
+:Statut = EN_COURS;
+repeat
+  :Se rendre au bac suivant (GPS simulé);
+  :Vider le bac;
+  if (Anomalie ?) then (oui)
+    :Signaler un incident;
+  else (non)
+    :Enregistrer le poids collecté;
+    :Remettre le niveau du bac à 0;
+  endif
+repeat while (Il reste des bacs et\ncapacité disponible ?) is (oui)
+->non;
+:Retour au dépôt / décharge;
+:Statut = TERMINEE;
+:Mettre à jour les statistiques;
+stop
+@enduml

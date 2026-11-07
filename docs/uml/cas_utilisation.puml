@@ -1,0 +1,66 @@
+@startuml cas_utilisation
+title Cas d'utilisation - Gestion automatique du ramassage (Tuléar)
+left to right direction
+skinparam packageStyle rectangle
+
+actor "Administrateur" as Admin
+actor "Superviseur" as Sup
+actor "Chauffeur" as Chauf
+actor "Citoyen" as Cit
+actor "Simulateur\n(capteurs, GPS)" as Sim <<système>>
+
+rectangle "Système de gestion du ramassage" {
+  usecase "S'authentifier" as UC0
+  usecase "Gérer les utilisateurs" as UC1
+  usecase "Gérer les zones" as UC2
+  usecase "Gérer les bacs" as UC3
+  usecase "Gérer les camions" as UC4
+  usecase "Paramétrer les seuils" as UC5
+
+  usecase "Visualiser la carte des bacs" as UC6
+  usecase "Consulter les alertes" as UC7
+  usecase "Planifier une tournée" as UC8
+  usecase "Affecter camion et chauffeur" as UC9
+  usecase "Suivre les camions en temps réel" as UC10
+  usecase "Consulter les rapports" as UC11
+
+  usecase "Consulter sa tournée" as UC12
+  usecase "Confirmer la vidange d'un bac" as UC13
+  usecase "Signaler un incident" as UC14
+
+  usecase "Signaler un bac endommagé" as UC15
+
+  usecase "Envoyer mesures capteurs" as UC16
+  usecase "Envoyer position GPS" as UC17
+  usecase "Générer une alerte" as UC18
+  usecase "Calculer l'itinéraire optimisé" as UC19
+}
+
+Admin --> UC1
+Admin --> UC2
+Admin --> UC3
+Admin --> UC4
+Admin --> UC5
+Sup --> UC6
+Sup --> UC7
+Sup --> UC8
+Sup --> UC9
+Sup --> UC10
+Sup --> UC11
+Chauf --> UC12
+Chauf --> UC13
+Chauf --> UC14
+Cit --> UC15
+Sim --> UC16
+Sim --> UC17
+
+UC1 ..> UC0 : <<include>>
+UC3 ..> UC0 : <<include>>
+UC8 ..> UC0 : <<include>>
+UC12 ..> UC0 : <<include>>
+UC8 ..> UC19 : <<include>>
+UC16 ..> UC18 : <<extend>>\n[niveau > seuil]
+UC13 ..> UC14 : <<extend>>\n[anomalie]
+UC8 ..> UC9 : <<include>>
+UC6 ..> UC7 : <<extend>>
+@enduml

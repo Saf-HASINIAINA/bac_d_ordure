@@ -1,0 +1,257 @@
+@startuml classes
+title Diagramme de classes - Gestion du ramassage (Tuléar)
+skinparam classAttributeIconSize 0
+skinparam linetype ortho
+
+' ===================== Utilisateurs =====================
+abstract class Utilisateur {
+  - id : Long
+  - nom : String
+  - prenom : String
+  - email : String
+  - motDePasseHache : String
+  - actif : boolean
+  + authentifier(mdp : String) : boolean
+  + {abstract} getRole() : Role
+}
+class Administrateur {
+  + getRole() : Role
+  + parametrerSeuils(s : Seuils) : void
+}
+class Superviseur {
+  + getRole() : Role
+  + lancerTournee(t : Tournee) : void
+}
+class Chauffeur {
+  - numeroPermis : String
+  + getRole() : Role
+  + confirmerCollecte(b : Bac) : Collecte
+}
+enum Role {
+  ADMIN
+  SUPERVISEUR
+  CHAUFFEUR
+}
+Utilisateur <|-- Administrateur
+Utilisateur <|-- Superviseur
+Utilisateur <|-- Chauffeur
+Utilisateur ..> Role
+
+' ===================== Géographie =====================
+class Position {
+  - latitude : double
+  - longitude : double
+  + distanceVers(p : Position) : double
+}
+class Zone {
+  - id : Long
+  - nom : String
+  - frequenceCollecteHeures : int
+  + calculerTauxMoyenRemplissage() : double
+}
+
+' ===================== Bacs et capteurs =====================
+class Bac {
+  - id : Long
+  - code : String
+  - capaciteLitres : double
+  - niveauPourcent : double
+  - dateDerniereCollecte : LocalDateTime
+  - etat : EtatBac
+  + mettreAJourNiveau(n : double) : void
+  + estACollecter(seuil : double) : boolean
+  + vider() : void
+}
+enum EtatBac {
+  VIDE
+  MOYEN
+  PLEIN
+  CRITIQUE
+  HORS_SERVICE
+}
+enum TypeDechet {
+  MENAGER
+  RECYCLABLE
+  ORGANIQUE
+}
+abstract class Capteur {
+  - id : Long
+  - actif : boolean
+  - derniereMesure : LocalDateTime
+  + {abstract} mesurer() : Mesure
+}
+class CapteurNiveau {
+  + mesurer() : Mesure
+}
+class CapteurPoids {
+  + mesurer() : Mesure
+}
+class CapteurGaz {
+  + mesurer() : Mesure
+}
+class Mesure {
+  - id : Long
+  - type : TypeMesure
+  - valeur : double
+  - horodatage : LocalDateTime
+}
+enum TypeMesure {
+  NIVEAU
+  POIDS
+  GAZ
+  TEMPERATURE
+}
+class CapteurFactory {
+  + {static} creer(type : TypeMesure) : Capteur
+}
+
+Bac "1" *-- "1..*" Capteur : équipé de >
+Capteur <|-- CapteurNiveau
+Capteur <|-- CapteurPoids
+Capteur <|-- CapteurGaz
+Capteur "1" --> "*" Mesure : produit >
+Bac "*" --> "1" Zone : situé dans >
+Bac "1" --> "1" Position
+Bac --> EtatBac
+Bac --> TypeDechet
+Mesure --> TypeMesure
+CapteurFactory ..> Capteur : crée
+
+' ===================== Collecte =====================
+class Camion {
+  - id : Long
+  - immatriculation : String
+  - capaciteKg : double
+  - chargeActuelleKg : double
+  - statut : StatutCamion
+  + peutCharger(kg : double) : boolean
+  + decharger() : void
+}
+enum StatutCamion {
+  DISPONIBLE
+  EN_TOURNEE
+  EN_PANNE
+}
+class Tournee {
+  - id : Long
+  - date : LocalDate
+  - statut : StatutTournee
+  - distanceKm : double
+  + ajouterCollecte(c : Collecte) : void
+  + demarrer() : void
+  + terminer() : void
+  + calculerPoidsTotal() : double
+}
+enum StatutTournee {
+  PLANIFIEE
+  EN_COURS
+  TERMINEE
+  ANNULEE
+}
+class Collecte {
+  - id : Long
+  - ordre : int
+  - poidsCollecteKg : double
+  - heureCollecte : LocalDateTime
+  - effectuee : boolean
+}
+
+Camion --> StatutCamion
+Camion "1" --> "*" Tournee : effectue >
+Chauffeur "1" --> "*" Tournee : conduit >
+Superviseur "1" --> "*" Tournee : valide >
+Tournee --> StatutTournee
+Tournee "1" *-- "1..*" Collecte
+Collecte "*" --> "1" Bac : vide >
+Tournee "*" --> "1" Zone
+
+' ===================== Planification (Strategy) =====================
+interface StrategieOptimisation {
+  + calculer(bacs : List<Bac>, camion : Camion, depart : Position) : List<Bac>
+}
+class PlusProcheVoisin {
+  + calculer(...) : List<Bac>
+}
+class PrioriteRemplissage {
+  + calculer(...) : List<Bac>
+}
+class PlanificateurTournee {
+  - strategie : StrategieOptimisation
+  + definirStrategie(s : StrategieOptimisation) : void
+  + planifier(zone : Zone, camion : Camion) : Tournee
+}
+StrategieOptimisation <|.. PlusProcheVoisin
+StrategieOptimisation <|.. PrioriteRemplissage
+PlanificateurTournee o--> StrategieOptimisation
+PlanificateurTournee ..> Tournee : crée
+PlanificateurTournee ..> Bac : sélectionne
+
+' ===================== Alertes (Observer) =====================
+interface Observateur {
+  + notifier(a : Alerte) : void
+}
+class Alerte {
+  - id : Long
+  - type : TypeAlerte
+  - message : String
+  - dateCreation : LocalDateTime
+  - traitee : boolean
+}
+enum TypeAlerte {
+  BAC_PLEIN
+  RISQUE_INCENDIE
+  CAPTEUR_PANNE
+  INCIDENT_CHAUFFEUR
+}
+class ServiceAlerte {
+  - observateurs : List<Observateur>
+  + abonner(o : Observateur) : void
+  + evaluerMesure(b : Bac, m : Mesure) : void
+}
+class NotificateurSuperviseur {
+  + notifier(a : Alerte) : void
+}
+class NotificateurWebSocket {
+  + notifier(a : Alerte) : void
+}
+Observateur <|.. NotificateurSuperviseur
+Observateur <|.. NotificateurWebSocket
+ServiceAlerte o--> "*" Observateur
+ServiceAlerte ..> Alerte : crée
+Alerte --> TypeAlerte
+Alerte "*" --> "0..1" Bac
+
+' ===================== Simulation =====================
+class MoteurSimulation <<Singleton>> {
+  - facteurVitesse : int
+  - horlogeSimulee : LocalDateTime
+  + demarrer() : void
+  + arreter() : void
+  + tick() : void
+}
+class ModuleCommunication {
+  - tauxPerte : double
+  - latenceMs : int
+  + envoyer(m : Mesure) : boolean
+}
+class GPSCamion {
+  + positionSuivante(itineraire : List<Position>) : Position
+}
+MoteurSimulation ..> Capteur : déclenche mesurer()
+MoteurSimulation ..> ModuleCommunication
+MoteurSimulation ..> GPSCamion
+MoteurSimulation ..> ServiceAlerte
+Camion "1" --> "1" GPSCamion
+Camion "1" --> "1" Position : position actuelle
+
+' ===================== Reporting =====================
+class Rapport {
+  - periodeDebut : LocalDate
+  - periodeFin : LocalDate
+  + tonnageTotal() : double
+  + kilometresParcourus() : double
+  + tauxRemplissageMoyenALaCollecte() : double
+}
+Rapport ..> Tournee
+Rapport ..> Collecte
+@enduml

@@ -1,0 +1,49 @@
+@startuml sequence_collecte
+title Séquence - De la mesure du capteur à la vidange du bac
+autonumber
+
+participant "MoteurSimulation" as Moteur
+participant "CapteurNiveau" as Capt
+participant "ModuleCommunication" as Com
+participant "ServiceMesure" as SM
+participant "Bac" as Bac
+participant "ServiceAlerte" as SA
+participant "NotificateurWebSocket" as WS
+actor Superviseur as Sup
+participant "PlanificateurTournee" as Plan
+actor Chauffeur as Chauf
+database PostgreSQL as DB
+
+== Mesure et alerte ==
+Moteur -> Capt : mesurer()
+Capt --> Moteur : Mesure(niveau=84%)
+Moteur -> Com : envoyer(mesure)
+Com -> SM : recevoir(mesure)
+SM -> DB : enregistrer(mesure)
+SM -> Bac : mettreAJourNiveau(84)
+SM -> SA : evaluerMesure(bac, mesure)
+alt niveau >= seuil (80%)
+  SA -> DB : enregistrer(Alerte BAC_PLEIN)
+  SA -> WS : notifier(alerte)
+  WS --> Sup : alerte en temps réel
+end
+
+== Planification ==
+Sup -> Plan : planifier(zone, camion)
+Plan -> DB : bacsACollecter(zone)
+DB --> Plan : liste de bacs
+Plan -> Plan : strategie.calculer(bacs, camion, depot)
+Plan -> DB : enregistrer(Tournee + Collectes)
+Plan --> Sup : Tournee PLANIFIEE
+Sup -> Plan : lancer(tournee)
+
+== Exécution ==
+Chauf -> Plan : consulter sa tournée
+loop pour chaque Collecte dans l'ordre
+  Chauf -> Bac : confirmerCollecte(bac)
+  Bac -> Bac : vider() (niveau = 0)
+  Chauf -> DB : enregistrer(Collecte, poids)
+end
+Chauf -> Plan : terminer(tournee)
+Plan -> DB : statut = TERMINEE
+@enduml

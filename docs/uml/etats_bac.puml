@@ -1,0 +1,21 @@
+@startuml etats_bac
+title États d'un bac
+[*] --> VIDE : installation
+
+VIDE --> MOYEN : niveau >= 40%
+MOYEN --> PLEIN : niveau >= 70%
+PLEIN --> CRITIQUE : niveau >= 90%
+
+MOYEN --> VIDE : vidange
+PLEIN --> VIDE : vidange
+CRITIQUE --> VIDE : vidange
+
+VIDE --> HORS_SERVICE : capteur en panne / bac endommagé
+MOYEN --> HORS_SERVICE : capteur en panne / bac endommagé
+PLEIN --> HORS_SERVICE : capteur en panne / bac endommagé
+CRITIQUE --> HORS_SERVICE : capteur en panne / bac endommagé
+HORS_SERVICE --> VIDE : réparation
+
+PLEIN : alerte BAC_PLEIN dès 80%
+CRITIQUE : prioritaire dans la tournée
+@enduml

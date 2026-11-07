@@ -1,0 +1,8 @@
+supabase/.temp/
+supabase/.branches/
+.env
+.env.*
+target/
+.idea/
+.vscode/
+!.env.example
