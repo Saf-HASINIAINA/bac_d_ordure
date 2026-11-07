@@ -11,4 +11,6 @@ public interface TourneeRepository extends JpaRepository<Tournee, Long> {
     List<Tournee> findByStatut(StatutTournee statut);
     boolean existsByCamionIdAndStatutIn(Long camionId, Collection<StatutTournee> statuts);
     boolean existsByChauffeurIdAndStatutIn(Long chauffeurId, Collection<StatutTournee> statuts);
+    List<Tournee> findAllByOrderByIdDesc();
+    List<Tournee> findByStatutOrderByIdDesc(StatutTournee statut);
 }

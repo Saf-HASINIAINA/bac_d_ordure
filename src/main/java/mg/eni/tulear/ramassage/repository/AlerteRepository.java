@@ -10,4 +10,6 @@ public interface AlerteRepository extends JpaRepository<Alerte, Long> {
     boolean existsByBacIdAndTypeAndTraiteeFalse(Long bacId, TypeAlerte type);
     List<Alerte> findByBacIdAndTypeAndTraiteeFalse(Long bacId, TypeAlerte type);
     List<Alerte> findByTraiteeFalseOrderByDateCreationDesc();
+    List<Alerte> findAllByOrderByDateCreationDesc();
+    long countByTraiteeFalse();
 }
