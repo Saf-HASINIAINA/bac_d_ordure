@@ -14,6 +14,12 @@ intervalle des mesures (30 s par défaut, `--simulation.intervalle-ms=5000` pour
 taux de perte des messages et durée de conservation des mesures (2 jours, purge automatique).
 Attention : le plan gratuit de Supabase est limité à 500 Mo, arrêtez l'application quand vous ne l'utilisez pas.
 
+## Planification des tournées
+Le planificateur retient les bacs remplis à 80 % ou plus (RG2), en commençant par les plus remplis (RG5), sans dépasser
+la capacité du camion (RG3), puis les ordonne avec la stratégie choisie par `tournee.strategie`
+(`plus-proche-voisin` par défaut, ou `priorite-remplissage`). Le dépôt se règle avec `tournee.depot-latitude/longitude`.
+Cycle d'une tournée : planifier -> démarrer -> confirmer la vidange de chaque bac -> terminer (ou annuler tant qu'elle est planifiée).
+
 ## Tests
 `mvn test` (tests unitaires, sans base de données).
 
@@ -22,7 +28,8 @@ Schéma géré uniquement par les migrations : voir [docs/02_base_de_donnees.md]
 
 ## Structure
 - `domain/` entités JPA et logique métier (Bac, Capteur et ses sous-classes, Tournee, ...)
-- `service/` alertes (Observer), traitement des mesures, paramètres
+- `service/` alertes (Observer), traitement des mesures, paramètres, cycle de vie des tournées (`TourneeService`)
+- `planification/` planificateur de tournées et stratégies d'optimisation (Strategy : `PlusProcheVoisin`, `PrioriteRemplissage`)
 - `simulation/` moteur de simulation et module de communication simulé
 - `repository/` accès aux données (Spring Data JPA)
 - `config/` données de démonstration

@@ -69,6 +69,12 @@ public class Tournee {
         statut = StatutTournee.TERMINEE;
     }
 
+    /** PLANIFIEE -> ANNULEE. */
+    public void annuler() {
+        if (statut != StatutTournee.PLANIFIEE) throw new IllegalStateException("Seule une tournée planifiée peut être annulée");
+        statut = StatutTournee.ANNULEE;
+    }
+
     public double calculerPoidsTotal() {
         return collectes.stream()
                 .map(Collecte::getPoidsCollecteKg)
