@@ -10,7 +10,9 @@ Projet de fin d'année M1 — ENI Fianarantsoa. Java 17 / Spring Boot / PostgreS
 3. Ensuite : `mvn spring-boot:run`
 
 Réglages de la simulation dans `src/main/resources/application.properties` (`simulation.*`) :
-intervalle des mesures, accélération du temps, taux de perte des messages.
+intervalle des mesures (30 s par défaut, `--simulation.intervalle-ms=5000` pour une démo), accélération du temps,
+taux de perte des messages et durée de conservation des mesures (2 jours, purge automatique).
+Attention : le plan gratuit de Supabase est limité à 500 Mo, arrêtez l'application quand vous ne l'utilisez pas.
 
 ## Tests
 `mvn test` (tests unitaires, sans base de données).

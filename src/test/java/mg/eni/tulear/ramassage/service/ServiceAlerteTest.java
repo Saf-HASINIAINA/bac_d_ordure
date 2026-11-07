@@ -62,4 +62,20 @@ class ServiceAlerteTest {
         service.evaluerMesure(bac, mesure(TypeMesure.GAZ, 400), Seuils.parDefaut());
         verify(repository).save(argThat(a -> a.getType() == TypeAlerte.RISQUE_INCENDIE));
     }
+
+    @Test
+    void alerteDejaConnueNeRequeteplusLaBase() {
+        service.evaluerMesure(bac, mesure(TypeMesure.NIVEAU, 85), Seuils.parDefaut());
+        service.evaluerMesure(bac, mesure(TypeMesure.NIVEAU, 90), Seuils.parDefaut());
+        verify(repository, times(1)).existsByBacIdAndTypeAndTraiteeFalse(1L, TypeAlerte.BAC_PLEIN);
+        verify(repository, times(1)).save(any(Alerte.class));
+    }
+
+    @Test
+    void apresTraitementUneNouvelleAlertePeutEtreCreee() {
+        service.evaluerMesure(bac, mesure(TypeMesure.NIVEAU, 85), Seuils.parDefaut());
+        service.alerteTraitee(1L, TypeAlerte.BAC_PLEIN);
+        service.evaluerMesure(bac, mesure(TypeMesure.NIVEAU, 85), Seuils.parDefaut());
+        verify(repository, times(2)).save(any(Alerte.class));
+    }
 }
