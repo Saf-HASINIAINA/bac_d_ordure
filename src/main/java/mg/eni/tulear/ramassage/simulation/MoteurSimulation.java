@@ -27,15 +27,17 @@ public class MoteurSimulation {
     private final CapteurRepository capteurRepository;
     private final ModuleCommunication communication;
     private final MesureService mesureService;
+    private final PannesSimulees pannes;
     private final ParametreService parametreService;
     private final double facteurVitesse;
 
     public MoteurSimulation(CapteurRepository capteurRepository, ModuleCommunication communication,
-                            MesureService mesureService, ParametreService parametreService,
+                            MesureService mesureService, PannesSimulees pannes, ParametreService parametreService,
                             @Value("${simulation.facteur-vitesse:1.0}") double facteurVitesse) {
         this.capteurRepository = capteurRepository;
         this.communication = communication;
         this.mesureService = mesureService;
+        this.pannes = pannes;
         this.parametreService = parametreService;
         this.facteurVitesse = facteurVitesse;
     }
@@ -49,6 +51,9 @@ public class MoteurSimulation {
 
         List<Mesure> recues = new ArrayList<>(capteurs.size());
         for (Capteur capteur : capteurs) {
+            if (pannes.enPanne(capteur.getId())) {
+                continue; // capteur en panne : aucune mesure envoyée
+            }
             Mesure mesure = capteur.mesurer(facteurVitesse);
             if (communication.envoyer()) {
                 recues.add(mesure);

@@ -2,6 +2,7 @@ package mg.eni.tulear.ramassage.domain;
 
 import jakarta.persistence.DiscriminatorValue;
 import jakarta.persistence.Entity;
+import mg.eni.tulear.ramassage.domain.enums.TypeCapteur;
 import mg.eni.tulear.ramassage.domain.enums.TypeMesure;
 
 import java.util.concurrent.ThreadLocalRandom;
@@ -16,6 +17,9 @@ public class CapteurGaz extends Capteur {
     protected CapteurGaz() { }
 
     public CapteurGaz(Bac bac) { super(bac); }
+
+    @Override
+    public TypeCapteur getType() { return TypeCapteur.GAZ; }
 
     @Override
     public Mesure mesurer(double facteurVitesse) {
