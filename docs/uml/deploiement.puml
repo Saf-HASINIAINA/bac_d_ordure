@@ -1,0 +1,40 @@
+@startuml deploiement
+title Architecture de déploiement
+skinparam shadowing false
+skinparam componentStyle rectangle
+
+actor "Administrateur\nSuperviseur\nChauffeur" as Utilisateur
+
+node "Navigateur web" {
+  component "Tableau de bord\n(HTML, CSS, JavaScript)\nLeaflet + Chart.js" as Page
+}
+
+node "Poste local (ou serveur)\nJava 17" {
+  component "Application Spring Boot :8080" as App {
+    component "Fichiers statiques\n+ API REST (JSON)" as Api
+    component "Spring Security\n(session, CSRF, rôles)" as Secu
+    component "Services métier\nPlanification, alertes, rapports" as Metier
+    component "Simulateur de matériel\ncapteurs, GPS, communication, pannes" as Simu
+  }
+}
+
+cloud "Supabase (Europe)" {
+  database "PostgreSQL\n10 tables\nmigrations versionnées" as Base
+}
+
+cloud "OpenStreetMap" as OSM
+
+Utilisateur --> Page
+Page --> Api : HTTP (cookie de session\n+ jeton CSRF)
+Page --> OSM : tuiles de la carte
+Api --> Secu
+Secu --> Metier
+Simu --> Metier : mesures
+Metier --> Base : JDBC (Session pooler :5432)
+
+note right of Base
+  Schéma géré uniquement par
+  supabase/migrations (db push).
+  Hibernate : ddl-auto=validate.
+end note
+@enduml

@@ -1,0 +1,52 @@
+@startuml sequence_connexion
+title Séquence - inscription, validation du compte et connexion
+skinparam shadowing false
+autonumber
+
+actor Visiteur as V
+actor Administrateur as A
+participant "Navigateur\n(login.html, JavaScript)" as N
+participant "Spring Security" as SS
+participant "UtilisateurService" as US
+participant "UtilisateurDetailsService" as UDS
+database "PostgreSQL" as DB
+
+== Inscription ==
+V -> N : ouvre inscription.html
+N -> SS : GET inscription.html
+SS --> N : page + cookie XSRF-TOKEN
+V -> N : saisit nom, e-mail, permis, mot de passe
+N -> SS : POST /api/auth/inscription\n(en-tête X-XSRF-TOKEN)
+SS -> SS : vérifie le jeton CSRF
+SS -> US : inscrire(données validées)
+US -> DB : Chauffeur inactif, mot de passe haché (BCrypt)
+US --> N : 201 « un administrateur doit valider votre compte »
+
+== Validation par l'administrateur ==
+A -> N : section « Utilisateurs » du tableau de bord
+N -> SS : POST /api/utilisateurs/{id}/activer
+SS -> SS : rôle ADMIN exigé (sinon 403)
+SS -> US : activer(id)
+US -> DB : actif = true
+
+== Connexion ==
+V -> N : saisit e-mail et mot de passe
+N -> SS : POST /api/auth/connexion (formulaire + jeton CSRF)
+SS -> UDS : loadUserByUsername(e-mail)
+UDS -> DB : utilisateur
+UDS --> SS : UtilisateurDetails (rôle, actif)
+alt compte inactif
+  SS --> N : 401 « en attente de validation »
+else mauvais mot de passe ou e-mail inconnu
+  SS --> N : 401 « e-mail ou mot de passe incorrect » (même message)
+else identifiants valides
+  SS --> N : 200 + cookie de session (HttpOnly, SameSite=Lax)
+  N -> N : redirige vers le tableau de bord
+end
+
+== Utilisation ==
+N -> SS : GET /api/auth/moi
+SS --> N : identité et rôle -> l'interface masque ce que le rôle ne permet pas
+N -> SS : requêtes de l'API (cookie + jeton CSRF)
+SS -> SS : droits par rôle appliqués côté serveur\n(un chauffeur : uniquement ses tournées)
+@enduml

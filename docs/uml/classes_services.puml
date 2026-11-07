@@ -1,0 +1,131 @@
+@startuml classes_services
+title Diagramme de classes - services, patterns, simulation et sécurité
+skinparam classAttributeIconSize 0
+skinparam shadowing false
+skinparam classBackgroundColor #FFFFFF
+skinparam packageStyle rectangle
+hide empty members
+
+package "api (REST)" #F5F8FF {
+  class "BacController\nTourneeController\nAlerteController\nRapportController\nUtilisateurController\nAuthController\nReferentielController" as Controllers
+  class GlobalExceptionHandler
+}
+
+package "securite" #FFF8F0 {
+  class SecurityConfig {
+    connexion par session, CSRF,
+    droits par rôle, CSP
+  }
+  class UtilisateurDetailsService
+  class UtilisateurDetails
+  SecurityConfig ..> UtilisateurDetailsService
+  UtilisateurDetailsService ..> UtilisateurDetails : crée
+}
+
+package "service" #F5FFF5 {
+  class TourneeFacade {
+    + lister / obtenir (selon le rôle)
+    + planifier, demarrer, terminer, annuler
+    + confirmerCollecte
+    contrôle : un chauffeur n'agit
+    que sur ses tournées
+  }
+  class TourneeService {
+    + planifier(zone, camion, chauffeur, superviseur) : Tournee
+    + demarrer(id) : Tournee
+    + confirmerCollecte(id, bacId) : Collecte
+    + terminer(id) : Tournee
+    + annuler(id) : Tournee
+  }
+  class MesureService {
+    + traiterLot(mesures, seuils)
+  }
+  class MesureBatchWriter {
+    + inserer(mesures)
+  }
+  class ServiceAlerte <<Subject>> {
+    - observateurs : List<Observateur>
+    + evaluerMesure(bac, mesure, seuils)
+    + signalerCapteurEnPanne(bac, type, minutes)
+    + alerteTraitee(bacId, type)
+  }
+  interface Observateur <<Observer>> {
+    + notifier(alerte : Alerte)
+  }
+  class NotificateurLog
+  class SurveillanceCapteurs {
+    + surveiller()  « toutes les minutes »
+  }
+  class ParametreService {
+    + chargerSeuils() : Seuils
+  }
+  class UtilisateurService {
+    + inscrire(), creer()
+    + activer(), desactiver()
+  }
+  class AlerteService
+  class ConsultationService
+  class RapportService {
+    + generer(debut, fin) : RapportDto
+    + exporterCsv(debut, fin) : String
+  }
+  class CsvCollectes
+  class PurgeMesures
+  Observateur <|.. NotificateurLog
+  ServiceAlerte o--> "*" Observateur
+  MesureService --> ServiceAlerte
+  MesureService --> MesureBatchWriter
+  SurveillanceCapteurs --> ServiceAlerte
+  SurveillanceCapteurs ..> ParametreService
+  TourneeFacade --> TourneeService
+  TourneeService --> ServiceAlerte : clôture BAC_PLEIN
+  RapportService ..> CsvCollectes
+  AlerteService --> ServiceAlerte
+}
+
+package "planification" #FFFDF0 {
+  interface StrategieOptimisation <<Strategy>> {
+    + calculer(bacs, camion, depart) : List<Bac>
+  }
+  class PlusProcheVoisin
+  class PrioriteRemplissage
+  class PlanificateurTournee {
+    - strategie : StrategieOptimisation
+    + definirStrategie(s)
+    + planifier(zone, candidats, camion,\n   chauffeur, depot, seuils) : Optional<Tournee>
+  }
+  StrategieOptimisation <|.. PlusProcheVoisin
+  StrategieOptimisation <|.. PrioriteRemplissage
+  PlanificateurTournee o--> StrategieOptimisation
+}
+
+package "simulation" #F8F5FF {
+  class MoteurSimulation <<scheduler>> {
+    + tick()  « toutes les 30 s »
+  }
+  class ModuleCommunication {
+    + envoyer() : boolean  « perte simulée »
+  }
+  class PannesSimulees {
+    + enPanne(capteurId) : boolean
+    + forcer(capteurId, ticks)
+  }
+  MoteurSimulation --> ModuleCommunication
+  MoteurSimulation --> PannesSimulees
+  MoteurSimulation --> MesureService
+  MoteurSimulation ..> ParametreService
+}
+
+class "Entités du domaine\n(voir classes_domaine)" as Domaine #EEEEEE
+
+Controllers --> TourneeFacade
+Controllers --> ConsultationService
+Controllers --> RapportService
+Controllers --> UtilisateurService
+Controllers --> AlerteService
+Controllers ..> GlobalExceptionHandler : erreurs 400/404/409
+Controllers ..> SecurityConfig : droits par rôle
+TourneeService --> PlanificateurTournee
+MoteurSimulation ..> Domaine : Capteur.mesurer()
+TourneeService ..> Domaine
+@enduml

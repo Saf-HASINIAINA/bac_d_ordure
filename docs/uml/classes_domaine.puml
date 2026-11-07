@@ -1,0 +1,211 @@
+@startuml classes_domaine
+title Diagramme de classes - domaine métier
+skinparam classAttributeIconSize 0
+skinparam shadowing false
+skinparam classBackgroundColor #FFFFFF
+skinparam packageStyle rectangle
+hide empty members
+
+package "Comptes" {
+  abstract class Utilisateur {
+    - id : Long
+    - nom : String
+    - prenom : String
+    - email : String
+    - motDePasseHache : String
+    - actif : boolean
+    + {abstract} getRole() : Role
+    + changerMotDePasse(hache : String)
+  }
+  class Administrateur
+  class Superviseur
+  class Chauffeur {
+    - numeroPermis : String
+  }
+  enum Role {
+    ADMIN
+    SUPERVISEUR
+    CHAUFFEUR
+  }
+  Utilisateur <|-- Administrateur
+  Utilisateur <|-- Superviseur
+  Utilisateur <|-- Chauffeur
+  Utilisateur ..> Role
+}
+
+package "Géographie" {
+  class Zone {
+    - id : Long
+    - nom : String
+    - frequenceCollecteHeures : int
+    - latitudeCentre : Double
+    - longitudeCentre : Double
+  }
+  class Position <<record>> {
+    + latitude : double
+    + longitude : double
+    + distanceVers(autre : Position) : double
+  }
+}
+
+package "Bacs et capteurs" {
+  class Bac {
+    - id : Long
+    - code : String
+    - latitude : double
+    - longitude : double
+    - capaciteLitres : double
+    - niveauPourcent : double
+    - typeDechet : TypeDechet
+    - etat : EtatBac
+    - dateDerniereCollecte : Instant
+    + mettreAJourNiveau(niveau : double, seuils : Seuils)
+    + estACollecter(seuilPourcent : double) : boolean
+    + vider()
+    + estimerPoidsKg() : double
+    + getPosition() : Position
+  }
+  class Seuils <<record>> {
+    + moyen, plein, critique : double
+    + alerteCollecte : double
+    + delaiCapteurPanneMin : int
+    + gazIncendie : double
+    + etatPour(niveau : double) : EtatBac
+  }
+  class Parametre {
+    - cle : String
+    - valeur : double
+    - description : String
+  }
+  abstract class Capteur {
+    - id : Long
+    - actif : boolean
+    - derniereMesure : Instant
+    + {abstract} mesurer(facteurVitesse : double) : Mesure
+    + {abstract} getType() : TypeCapteur
+  }
+  class CapteurNiveau
+  class CapteurPoids
+  class CapteurGaz
+  class CapteurFactory <<Factory>> {
+    + {static} creer(type : TypeCapteur, bac : Bac) : Capteur
+  }
+  class Mesure {
+    - id : Long
+    - type : TypeMesure
+    - valeur : double
+    - horodatage : Instant
+  }
+  enum EtatBac {
+    VIDE
+    MOYEN
+    PLEIN
+    CRITIQUE
+    HORS_SERVICE
+  }
+  enum TypeDechet {
+    MENAGER
+    RECYCLABLE
+    ORGANIQUE
+  }
+  enum TypeCapteur {
+    NIVEAU
+    POIDS
+    GAZ
+  }
+  enum TypeMesure {
+    NIVEAU
+    POIDS
+    GAZ
+    TEMPERATURE
+  }
+  Capteur <|-- CapteurNiveau
+  Capteur <|-- CapteurPoids
+  Capteur <|-- CapteurGaz
+  CapteurFactory ..> Capteur : crée
+  Bac "1" *-- "1..*" Capteur : équipé de
+  Capteur "1" --> "*" Mesure : produit
+  Bac --> EtatBac
+  Bac --> TypeDechet
+  Mesure --> TypeMesure
+  Capteur ..> TypeCapteur
+  Seuils ..> EtatBac
+  Bac ..> Seuils : utilise
+}
+
+package "Collecte" {
+  class Camion {
+    - id : Long
+    - immatriculation : String
+    - capaciteKg : double
+    - chargeActuelleKg : double
+    - statut : StatutCamion
+    - latitude : Double
+    - longitude : Double
+    + peutCharger(kg : double) : boolean
+    + charger(kg : double)
+    + decharger()
+    + deplacerVers(lat : double, lon : double)
+  }
+  class Tournee {
+    - id : Long
+    - date : LocalDate
+    - statut : StatutTournee
+    - distanceKm : double
+    + ajouterCollecte(c : Collecte)
+    + demarrer()
+    + terminer()
+    + annuler()
+    + calculerPoidsTotal() : double
+  }
+  class Collecte {
+    - id : Long
+    - ordre : int
+    - poidsCollecteKg : Double
+    - heureCollecte : Instant
+    - effectuee : boolean
+    + confirmer(poidsKg : double)
+  }
+  enum StatutCamion {
+    DISPONIBLE
+    EN_TOURNEE
+    EN_PANNE
+  }
+  enum StatutTournee {
+    PLANIFIEE
+    EN_COURS
+    TERMINEE
+    ANNULEE
+  }
+  Camion --> StatutCamion
+  Tournee --> StatutTournee
+  Tournee "1" *-- "1..*" Collecte : ordonnées
+  Camion "1" <-- "*" Tournee : effectuée avec
+}
+
+package "Alertes" {
+  class Alerte {
+    - id : Long
+    - type : TypeAlerte
+    - message : String
+    - dateCreation : Instant
+    - traitee : boolean
+    + marquerTraitee()
+  }
+  enum TypeAlerte {
+    BAC_PLEIN
+    RISQUE_INCENDIE
+    CAPTEUR_PANNE
+    INCIDENT_CHAUFFEUR
+  }
+  Alerte --> TypeAlerte
+}
+
+Bac "*" --> "1" Zone : situé dans
+Bac ..> Position
+Collecte "*" --> "1" Bac : vide
+Tournee "*" --> "1" Zone
+Tournee "*" --> "1" Chauffeur : conduite par
+Tournee "*" --> "0..1" Superviseur : planifiée par
+Alerte "*" --> "0..1" Bac
+@enduml

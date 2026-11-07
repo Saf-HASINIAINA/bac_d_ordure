@@ -1,0 +1,11 @@
+@startuml etats_tournee
+title États d'une tournée (RG8)
+skinparam shadowing false
+[*] --> PLANIFIEE : planifier\n(superviseur / admin)
+PLANIFIEE --> EN_COURS : démarrer\n(chauffeur concerné, superviseur, admin)
+PLANIFIEE --> ANNULEE : annuler\n(superviseur / admin)
+EN_COURS --> TERMINEE : terminer\ncamion déchargé et disponible
+EN_COURS : chaque vidange confirmée\nvide le bac, charge le camion\net clôture l'alerte BAC_PLEIN
+TERMINEE --> [*]
+ANNULEE --> [*]
+@enduml

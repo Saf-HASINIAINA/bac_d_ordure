@@ -35,23 +35,27 @@ permet de faire passer « 1 jour » en quelques minutes pour la démonstration.
 | **Administrateur** | Gère les utilisateurs, zones, bacs, camions et paramètres (seuils). |
 | **Superviseur (service de propreté)** | Suit la carte en temps réel, valide/lance les tournées, consulte les rapports. |
 | **Chauffeur / équipe de collecte** | Consulte sa tournée, confirme la vidange de chaque bac, signale un incident. |
-| **Citoyen** *(optionnel)* | Signale un bac endommagé ou un dépôt sauvage. |
+| **Visiteur** | S'inscrit comme chauffeur (compte en attente de validation) et se connecte. |
+| **Citoyen** *(optionnel, non réalisé)* | Signale un bac endommagé ou un dépôt sauvage. |
 | **Système de simulation** (acteur secondaire) | Génère les mesures des capteurs et les positions GPS. |
 
 ## 4. Besoins fonctionnels
-- **BF1** Gérer les bacs (CRUD, position GPS, capacité, zone, type de déchet).
-- **BF2** Gérer les zones/quartiers de Tuléar.
-- **BF3** Gérer les camions et les chauffeurs.
-- **BF4** Recevoir et enregistrer les mesures des capteurs (niveau, poids, gaz).
-- **BF5** Générer automatiquement des alertes (bac plein, incendie, capteur en panne).
-- **BF6** Planifier automatiquement des tournées optimisées (bacs prioritaires, capacité du camion).
-- **BF7** Affecter une tournée à un camion et un chauffeur.
-- **BF8** Suivre en temps réel la position des camions et l'avancement de la tournée.
-- **BF9** Confirmer la vidange d'un bac (remet le niveau à zéro, enregistre la collecte).
-- **BF10** Afficher une carte (Leaflet / OpenStreetMap) avec bacs colorés selon le niveau.
-- **BF11** Produire des rapports et statistiques (tonnage, km parcourus, taux de remplissage à la collecte).
-- **BF12** Authentification et gestion des rôles.
-- **BF13** Gérer les signalements des citoyens *(optionnel)*.
+- **BF1** Gérer les bacs (CRUD, position GPS, capacité, zone, type de déchet). — *partiel : consultation, filtres, état ; création par les données de démo, pas d'écran de création/modification*
+- **BF2** Gérer les zones/quartiers de Tuléar. — *partiel : consultation ; zones créées par les données de démo*
+- **BF3** Gérer les camions et les chauffeurs. — *partiel : comptes chauffeurs complets (inscription, validation, création) ; camions en consultation seulement*
+- **BF4** Recevoir et enregistrer les mesures des capteurs (niveau, poids, gaz). — *réalisé*
+- **BF5** Générer automatiquement des alertes (bac plein, incendie, capteur en panne). — *réalisé (bac plein, risque d'incendie, capteur en panne) ; le signalement d'incident par le chauffeur n'est pas réalisé*
+- **BF6** Planifier automatiquement des tournées optimisées (bacs prioritaires, capacité du camion). — *réalisé (deux stratégies : plus proche voisin, priorité au remplissage)*
+- **BF7** Affecter une tournée à un camion et un chauffeur. — *réalisé*
+- **BF8** Suivre en temps réel la position des camions et l'avancement de la tournée. — *partiel : la position du camion est mise à jour à chaque vidange, pas de trajet GPS continu*
+- **BF9** Confirmer la vidange d'un bac (remet le niveau à zéro, enregistre la collecte). — *réalisé*
+- **BF10** Afficher une carte (Leaflet / OpenStreetMap) avec bacs colorés selon le niveau. — *réalisé (Leaflet / OpenStreetMap)*
+- **BF11** Produire des rapports et statistiques (tonnage, km parcourus, taux de remplissage à la collecte). — *réalisé (période au choix, par zone et par jour)*
+- **BF12** Authentification et gestion des rôles. — *réalisé (3 rôles, session, CSRF, BCrypt)*
+- **BF13** Gérer les signalements des citoyens *(optionnel)*. — *non réalisé (optionnel)*
+
+- **BF14** Inscription publique et validation des comptes par un administrateur — *réalisé*.
+- **BF15** Export CSV des vidanges — *réalisé*.
 
 ## 5. Besoins non fonctionnels
 - Sécurité : authentification, mots de passe hachés, contrôle d'accès par rôle.
@@ -69,6 +73,8 @@ permet de faire passer « 1 jour » en quelques minutes pour la démonstration.
 - **RG6** Un capteur sans mesure depuis plus de N minutes est déclaré en panne (alerte).
 - **RG7** La confirmation de collecte remet le niveau du bac à 0 et enregistre le poids collecté.
 - **RG8** Une tournée a le statut : *Planifiée → En cours → Terminée* (ou *Annulée*).
+- **RG9** L'inscription publique crée toujours un chauffeur inactif ; seul un administrateur peut l'activer ou créer un compte avec un autre rôle.
+- **RG10** Un chauffeur ne voit et ne manipule que les tournées qui lui sont confiées ; planifier, annuler, traiter une alerte et consulter les rapports sont réservés aux superviseurs et administrateurs.
 
 ## 7. Choix techniques
 | Couche | Choix |
@@ -89,19 +95,28 @@ permet de faire passer « 1 jour » en quelques minutes pour la démonstration.
 - **Composition / agrégation** : `Bac` possède ses `Capteur` ; `Tournee` agrège des `Collecte`.
 - **Patterns** : *Strategy* (algorithme de tournée), *Observer* (alertes), *Factory* (création de capteurs), *Repository/DAO* (persistance), *Singleton* (moteur de simulation).
 
-## 9. Planning proposé
-1. Analyse et UML ← **en cours**
-2. Modèle de données (MCD/MLD) et script PostgreSQL
-3. Noyau métier + simulateurs (sans web)
-4. Algorithme de tournée et alertes
-5. Couche web (API REST + pages) et carte
-6. Authentification, rapports
-7. Tests, rapport final et soutenance
+## 9. Avancement
+| Étape | État |
+|---|---|
+| Analyse et UML | fait |
+| Modèle de données et migrations Supabase | fait |
+| Noyau métier et simulateurs | fait |
+| Algorithme de tournée et alertes | fait |
+| API REST et tableau de bord web (carte) | fait |
+| Authentification, inscription, droits par rôle | fait |
+| Rapports et export CSV | fait |
+| Détection des capteurs en panne (RG6) | fait |
+| Écrans de gestion des bacs, zones et camions (création, modification) | à faire |
+| Signalement d'incident par le chauffeur, signalements citoyens | à faire (optionnel) |
+| Rapport final et soutenance | voir `06_preparation_soutenance.md` |
 
 ## 10. Dossier des diagrammes
-Voir `docs/uml/` :
-- `cas_utilisation.puml`
-- `classes.puml`
-- `sequence_collecte.puml`
-- `activite_tournee.puml`
-- `etats_bac.puml`
+Sources PlantUML dans `docs/uml/`, images dans `docs/uml/images/` :
+- `cas_utilisation` : acteurs et cas d'utilisation
+- `classes_domaine` : entités du domaine
+- `classes_services` : services, patterns (Strategy, Observer, Factory), simulation, sécurité
+- `modele_donnees` : tables PostgreSQL
+- `sequence_collecte` : de la mesure à la vidange
+- `sequence_connexion` : inscription, validation, connexion
+- `activite_tournee`, `etats_bac`, `etats_tournee`
+- `deploiement` : architecture de déploiement
