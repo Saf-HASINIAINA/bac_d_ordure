@@ -52,6 +52,8 @@ export const api = {
   bacs: () => requete('/api/bacs'),
   alertes: (traitee) => requete(`/api/alertes${traitee === undefined ? '' : `?traitee=${traitee}`}`),
   tournees: () => requete('/api/tournees'),
+  rapport: (debut, fin) => requete(`/api/rapports?debut=${encodeURIComponent(debut)}&fin=${encodeURIComponent(fin)}`),
+  urlExportCsv: (debut, fin) => `/api/rapports/export.csv?debut=${encodeURIComponent(debut)}&fin=${encodeURIComponent(fin)}`,
   planifier: (corps) => requete('/api/tournees', { method: 'POST', corps }),
   demarrer: (id) => post(`/api/tournees/${id}/demarrer`),
   confirmerCollecte: (id, bacId) => post(`/api/tournees/${id}/collectes/${bacId}/confirmer`),

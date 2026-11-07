@@ -1,6 +1,7 @@
 import { api } from './api.js';
 import { Carte, COULEURS, LIBELLES_ETAT } from './carte.js';
 import { h, remplacer, entier, depuis } from './dom.js';
+import { initialiserRapport } from './rapport.js';
 
 const INTERVALLE_MS = 5000;
 const NB_TOURNEES_AFFICHEES = 6;
@@ -268,6 +269,7 @@ function afficherUtilisateurConnecte() {
   });
   // les droits sont aussi contrôlés côté serveur : masquer ici n'est qu'un confort
   $('bloc-planification').hidden = !peutGerer();
+  $('bloc-rapport').hidden = !peutGerer();
   $('bloc-utilisateurs').hidden = !estAdmin();
   if (!peutGerer()) $('titre-tournees').textContent = 'Mes tournées';
 }
@@ -364,6 +366,7 @@ async function demarrer() {
   creerLegende();
   creerGraphique();
   brancherFormulaire();
+  if (peutGerer()) initialiserRapport(afficherMessage);
   if (estAdmin()) brancherFormulaireUtilisateur();
   try {
     const [configuration, zones, chauffeurs] = await Promise.all([

@@ -17,6 +17,12 @@ voir [04_authentification.md](04_authentification.md) pour les droits par rôle.
 | GET | `/tournees?statut=` | Tournées, filtrables (`PLANIFIEE`, `EN_COURS`, `TERMINEE`, `ANNULEE`) |
 | GET | `/tournees/{id}` | Détail d'une tournée avec ses collectes dans l'ordre de passage |
 
+## Rapports (administrateur et superviseur)
+| Méthode | URL | Description |
+|---|---|---|
+| GET | `/rapports?debut=&fin=` | Bilan de la période (dates `AAAA-MM-JJ`, inclusives ; 30 derniers jours par défaut, 366 jours maximum) : tonnage, vidanges, tournées terminées, kilomètres, remplissage moyen à la collecte, alertes par type, détail par zone et par jour |
+| GET | `/rapports/export.csv?debut=&fin=` | Téléchargement CSV, une ligne par vidange (séparateur `;`, virgule décimale, UTF-8 avec BOM) |
+
 ## Actions
 | Méthode | URL | Description |
 |---|---|---|

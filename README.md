@@ -41,6 +41,13 @@ Cycle d'une tournée : planifier -> démarrer -> confirmer la vidange de chaque 
 ## API REST
 Les endpoints (bacs, alertes, tournées, statistiques) sont décrits dans [docs/03_api.md](docs/03_api.md).
 
+## Rapports
+Réservés aux administrateurs et superviseurs : section « Rapport d'activité » du tableau de bord (période au choix, 30 derniers
+jours par défaut). Tonnage collecté (total, par jour, par zone), vidanges, tournées terminées, kilomètres parcourus, remplissage
+moyen des bacs au moment de la vidange et alertes déclenchées. Les jours sont découpés selon le fuseau `app.fuseau`
+(`Indian/Antananarivo`). L'export CSV (une ligne par vidange, prévu pour Excel en français) est aussi disponible via
+`GET /api/rapports/export.csv?debut=AAAA-MM-JJ&fin=AAAA-MM-JJ`.
+
 ## Tests
 `mvn test` (tests unitaires, sans base de données).
 
