@@ -47,4 +47,5 @@ public abstract class Utilisateur {
     public String getMotDePasseHache() { return motDePasseHache; }
     public boolean isActif() { return actif; }
     public void setActif(boolean actif) { this.actif = actif; }
+    public void changerMotDePasse(String motDePasseHache) { this.motDePasseHache = motDePasseHache; }
 }

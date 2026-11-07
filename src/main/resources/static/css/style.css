@@ -148,3 +148,48 @@ progress { width: 100%; height: 8px; accent-color: var(--ok); }
   .formulaire .bouton { width: 100%; }
   .tournees { grid-template-columns: 1fr; }
 }
+
+/* ---------- authentification et gestion des comptes ---------- */
+[hidden] { display: none !important; }
+
+.entete-droite { display: flex; align-items: center; gap: 1.2rem; flex-wrap: wrap; justify-content: flex-end; }
+.utilisateur { display: flex; align-items: center; gap: .6rem; font-size: .9rem; }
+.badge.role { background: var(--accent); }
+
+input {
+  font: inherit; padding: .5rem .6rem; border: 1px solid var(--bordure); border-radius: 8px;
+  background: var(--surface); color: var(--texte); width: 100%;
+}
+.formulaire input { min-width: 180px; }
+
+.message:empty { display: none; }
+.message { padding: .6rem .9rem; border-radius: 8px; margin: 0; font-size: .9rem; border: 1px solid var(--bordure); background: var(--surface); }
+.message.succes { color: var(--ok); border-color: var(--ok); }
+.message.erreur { color: var(--danger); border-color: var(--danger); }
+
+.page-auth { display: grid; place-items: center; min-height: 100vh; padding: 16px; }
+.auth { width: 100%; max-width: 440px; }
+.auth h1 { text-align: center; }
+.auth .sous-titre { text-align: center; margin-bottom: 1.2rem; }
+.auth-formulaire {
+  background: var(--surface); border: 1px solid var(--bordure); border-radius: var(--rayon);
+  box-shadow: var(--ombre); padding: 1.4rem; display: grid; gap: .9rem;
+}
+.auth-formulaire h2 { margin: 0; }
+.auth-formulaire label { display: grid; gap: .3rem; font-size: .85rem; color: var(--texte-doux); }
+.auth-formulaire .bouton.principal { width: 100%; padding: .7rem 1rem; }
+.deux-colonnes { display: grid; grid-template-columns: 1fr 1fr; gap: .8rem; }
+.auth-lien { margin: 0; text-align: center; font-size: .9rem; color: var(--texte-doux); }
+.auth-lien a { color: var(--accent); }
+.aide { margin: 0; font-size: .8rem; color: var(--texte-doux); }
+
+.defilement { overflow-x: auto; }
+.tableau { width: 100%; border-collapse: collapse; font-size: .88rem; }
+.tableau th { text-align: left; color: var(--texte-doux); font-weight: 600; padding: .4rem .6rem; border-bottom: 1px solid var(--bordure); }
+.tableau td { padding: .5rem .6rem; border-bottom: 1px solid var(--bordure); }
+.creation { margin-top: 1rem; }
+.creation summary { cursor: pointer; font-weight: 600; margin-bottom: .8rem; }
+
+@media (max-width: 520px) {
+  .deux-colonnes { grid-template-columns: 1fr; }
+}

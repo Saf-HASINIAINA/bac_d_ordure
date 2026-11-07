@@ -2,6 +2,7 @@ package mg.eni.tulear.ramassage.api;
 
 import mg.eni.tulear.ramassage.api.dto.ErreurApi;
 import mg.eni.tulear.ramassage.service.RegleMetierException;
+import mg.eni.tulear.ramassage.service.RequeteInvalideException;
 import mg.eni.tulear.ramassage.service.RessourceIntrouvableException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -25,6 +26,11 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(RegleMetierException.class)
     public ResponseEntity<ErreurApi> regleMetier(RegleMetierException e) {
         return reponse(HttpStatus.CONFLICT, e.getMessage());
+    }
+
+    @ExceptionHandler(RequeteInvalideException.class)
+    public ResponseEntity<ErreurApi> requeteInvalide(RequeteInvalideException e) {
+        return reponse(HttpStatus.BAD_REQUEST, e.getMessage());
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)

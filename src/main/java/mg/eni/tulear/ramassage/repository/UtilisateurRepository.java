@@ -1,10 +1,11 @@
 package mg.eni.tulear.ramassage.repository;
 
-import mg.eni.tulear.ramassage.domain.*;
-import mg.eni.tulear.ramassage.domain.enums.*;
+import mg.eni.tulear.ramassage.domain.Utilisateur;
 import org.springframework.data.jpa.repository.JpaRepository;
-import java.util.List;
+
+import java.util.Optional;
 
 public interface UtilisateurRepository extends JpaRepository<Utilisateur, Long> {
-    java.util.Optional<Utilisateur> findByEmail(String email);
+    Optional<Utilisateur> findByEmailIgnoreCase(String email);
+    boolean existsByEmailIgnoreCase(String email);
 }

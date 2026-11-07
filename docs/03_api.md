@@ -1,7 +1,7 @@
 # API REST
 
-Base : `http://localhost:8080/api` — réponses en JSON. **Aucune authentification pour l'instant** :
-ne pas exposer l'application sur Internet avant l'ajout de Spring Security (prochaine étape).
+Base : `http://localhost:8080/api` — réponses en JSON. **Toutes les routes exigent une connexion** (sauf inscription et connexion), et les écritures un jeton CSRF :
+voir [04_authentification.md](04_authentification.md) pour les droits par rôle.
 
 ## Consultation
 | Méthode | URL | Description |

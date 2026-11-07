@@ -12,6 +12,7 @@ const LIBELLES_ALERTE = {
   CAPTEUR_PANNE: 'Capteur en panne',
   INCIDENT_CHAUFFEUR: 'Incident chauffeur',
 };
+const LIBELLES_ROLE = { ADMIN: 'Administrateur', SUPERVISEUR: 'Superviseur', CHAUFFEUR: 'Chauffeur' };
 const LIBELLES_TOURNEE = { PLANIFIEE: 'Planifiée', EN_COURS: 'En cours', TERMINEE: 'Terminée', ANNULEE: 'Annulée' };
 
 const $ = (id) => document.getElementById(id);
@@ -23,7 +24,12 @@ const etat = {
   tourneeChoisie: null, // tournée dont le trajet est tracé (null = première tournée active)
   signatures: {}, // évite de reconstruire une zone dont les données n'ont pas changé
   tournees: [],
+  moi: null, // utilisateur connecté
 };
+
+/** Administrateurs et superviseurs gèrent ; un chauffeur ne fait que dérouler ses propres tournées. */
+const peutGerer = () => etat.moi.role === 'ADMIN' || etat.moi.role === 'SUPERVISEUR';
+const estAdmin = () => etat.moi.role === 'ADMIN';
 
 /* ---------- utilitaires d'affichage ---------- */
 
@@ -119,7 +125,7 @@ function afficherAlertes(alertes) {
       h('div', {},
         h('div', { class: 'alerte-titre' }, `${LIBELLES_ALERTE[a.type] ?? a.type}${a.bacCode ? ` · ${a.bacCode}` : ''}`),
         h('div', { class: 'alerte-detail' }, `${a.message} · ${depuis(a.dateCreation)}`)),
-      bouton);
+      peutGerer() ? bouton : null);
   });
   if (alertes.length > visibles.length) {
     lignes.push(h('li', { class: 'vide' }, `+ ${alertes.length - visibles.length} autre(s) alerte(s)`));
@@ -158,7 +164,7 @@ function brancherFormulaire() {
       afficherMessage('Choisissez une zone, un camion et un chauffeur.', 'erreur');
       return;
     }
-    const bouton = evenement.submitter;
+    const bouton = evenement.currentTarget.querySelector('button[type="submit"]');
     executer(async () => {
       const tournee = await api.planifier(corps);
       etat.tourneeChoisie = tournee.id;
@@ -206,7 +212,9 @@ function carteTournee(t, selectionnee) {
   actions.push(voir);
   if (t.statut === 'PLANIFIEE') {
     actions.push(boutonAction('Démarrer', () => api.demarrer(t.id), `Tournée n°${t.id} démarrée.`, 'principal'));
-    actions.push(boutonAction('Annuler', () => api.annuler(t.id), `Tournée n°${t.id} annulée.`, 'danger'));
+    if (peutGerer()) {
+      actions.push(boutonAction('Annuler', () => api.annuler(t.id), `Tournée n°${t.id} annulée.`, 'danger'));
+    }
   }
   if (t.statut === 'EN_COURS') {
     actions.push(boutonAction('Terminer', () => api.terminer(t.id), `Tournée n°${t.id} terminée.`, 'principal'));
@@ -234,7 +242,8 @@ function afficherTournees(tournees) {
 
   if (!changement('tournees', { visibles, choix })) return;
   if (visibles.length === 0) {
-    remplacer($('tournees'), h('p', { class: 'vide' }, 'Aucune tournée pour le moment. Planifiez-en une ci-dessus.'));
+    remplacer($('tournees'), h('p', { class: 'vide' },
+      peutGerer() ? 'Aucune tournée pour le moment. Planifiez-en une ci-dessus.' : 'Aucune tournée ne vous est confiée pour le moment.'));
     return;
   }
   remplacer($('tournees'), visibles.map((t) => carteTournee(t, t.id === choix)));
@@ -245,20 +254,91 @@ function afficherTrajet() {
   if (changement('trajet', tournee)) etat.carte.majTrajet(tournee);
 }
 
+/* ---------- utilisateur connecté ---------- */
+
+function afficherUtilisateurConnecte() {
+  const { prenom, nom, role } = etat.moi;
+  $('utilisateur-nom').textContent = `${prenom} ${nom}`;
+  $('utilisateur-role').textContent = LIBELLES_ROLE[role] ?? role;
+  $('utilisateur').hidden = false;
+  $('bouton-deconnexion').addEventListener('click', async (e) => {
+    e.currentTarget.disabled = true;
+    try { await api.deconnexion(); } catch { /* même en cas d'échec réseau, on repart sur la page de connexion */ }
+    location.replace('/login.html');
+  });
+  // les droits sont aussi contrôlés côté serveur : masquer ici n'est qu'un confort
+  $('bloc-planification').hidden = !peutGerer();
+  $('bloc-utilisateurs').hidden = !estAdmin();
+  if (!peutGerer()) $('titre-tournees').textContent = 'Mes tournées';
+}
+
+/* ---------- gestion des comptes (administrateur) ---------- */
+
+function afficherUtilisateurs(liste) {
+  const inactifs = liste.filter((u) => !u.actif).length;
+  const compteur = $('nb-attente');
+  compteur.textContent = inactifs;
+  compteur.className = `compteur${inactifs === 0 ? ' zero' : ''}`;
+  if (!changement('utilisateurs', liste)) return;
+
+  remplacer($('utilisateurs'), liste.map((u) => {
+    const nomComplet = `${u.prenom} ${u.nom}`;
+    let action = null;
+    if (!u.actif) {
+      action = boutonAction('Activer', () => api.activer(u.id), `Compte de ${nomComplet} activé.`, 'principal');
+    } else if (u.id !== etat.moi.id) {
+      action = boutonAction('Désactiver', () => api.desactiver(u.id), `Compte de ${nomComplet} désactivé.`, 'danger');
+    }
+    return h('tr', {},
+      h('td', {}, nomComplet),
+      h('td', {}, u.email),
+      h('td', {}, LIBELLES_ROLE[u.role] ?? u.role),
+      h('td', {}, h('span', { class: `badge ${u.actif ? 'TERMINEE' : 'PLANIFIEE'}` }, u.actif ? 'Actif' : 'Inactif')),
+      h('td', {}, action));
+  }));
+}
+
+function brancherFormulaireUtilisateur() {
+  const role = $('u-role');
+  const basculerPermis = () => { $('u-permis-bloc').hidden = role.value !== 'CHAUFFEUR'; };
+  role.addEventListener('change', basculerPermis);
+  basculerPermis();
+
+  $('form-utilisateur').addEventListener('submit', (evenement) => {
+    evenement.preventDefault();
+    const corps = {
+      role: role.value,
+      nom: $('u-nom').value.trim(),
+      prenom: $('u-prenom').value.trim(),
+      email: $('u-email').value.trim(),
+      motDePasse: $('u-mdp').value,
+      numeroPermis: $('u-permis').value.trim() || null,
+    };
+    executer(async () => {
+      await api.creerUtilisateur(corps);
+      evenement.target.reset();
+      basculerPermis();
+    }, `Compte de ${corps.prenom} ${corps.nom} créé.`,
+      [evenement.currentTarget.querySelector('button[type="submit"]')]);
+  });
+}
+
 /* ---------- boucle de rafraîchissement ---------- */
 
 async function rafraichir(force = false) {
   if (etat.enCours || (document.hidden && !force)) return;
   etat.enCours = true;
   try {
-    const [stats, bacs, alertes, camions, tournees] = await Promise.all([
+    const [stats, bacs, alertes, camions, tournees, utilisateurs] = await Promise.all([
       api.statistiques(), api.bacs(), api.alertes(false), api.camions(), api.tournees(),
+      estAdmin() ? api.utilisateurs() : Promise.resolve(null),
     ]);
     afficherStatistiques(stats);
     etat.carte.majBacs(bacs);
     etat.carte.majCamions(camions);
     afficherAlertes(alertes);
-    afficherCamionsDisponibles(camions);
+    if (peutGerer()) afficherCamionsDisponibles(camions);
+    if (utilisateurs) afficherUtilisateurs(utilisateurs);
     afficherTournees(tournees);
     afficherTrajet();
     marquerConnexion(true);
@@ -271,11 +351,26 @@ async function rafraichir(force = false) {
 }
 
 async function demarrer() {
+  try {
+    etat.moi = await api.moi(); // sans session, api.js renvoie vers la page de connexion
+  } catch (e) {
+    if (e.statut !== 401) {
+      marquerConnexion(false);
+      afficherMessage("Impossible de joindre le serveur. Vérifiez que l'application est démarrée.", 'erreur');
+    }
+    return;
+  }
+  afficherUtilisateurConnecte();
   creerLegende();
   creerGraphique();
   brancherFormulaire();
+  if (estAdmin()) brancherFormulaireUtilisateur();
   try {
-    const [configuration, zones, chauffeurs] = await Promise.all([api.configuration(), api.zones(), api.chauffeurs()]);
+    const [configuration, zones, chauffeurs] = await Promise.all([
+      api.configuration(),
+      peutGerer() ? api.zones() : Promise.resolve([]),
+      peutGerer() ? api.chauffeurs() : Promise.resolve([]),
+    ]);
     etat.carte = new Carte('carte', configuration);
     remplirSelect($('champ-zone'), zones.map((z) => ({ valeur: z.id, libelle: z.nom })), 'Aucune zone');
     remplirSelect($('champ-chauffeur'),

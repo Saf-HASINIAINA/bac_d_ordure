@@ -1,0 +1,44 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Inscription - Ramassage des ordures</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body class="page-auth">
+  <main class="auth">
+    <h1>Ramassage des bacs d'ordures</h1>
+    <p class="sous-titre">Commune Urbaine de Tuléar</p>
+
+    <form class="auth-formulaire" id="form-inscription" novalidate>
+      <h2>Inscription chauffeur</h2>
+      <p class="aide">Votre compte sera créé en attente : un administrateur doit le valider avant votre première connexion.</p>
+      <div class="deux-colonnes">
+        <label>Nom
+          <input type="text" id="nom" name="nom" autocomplete="family-name" maxlength="100" required>
+        </label>
+        <label>Prénom
+          <input type="text" id="prenom" name="prenom" autocomplete="given-name" maxlength="100" required>
+        </label>
+      </div>
+      <label>Adresse e-mail
+        <input type="email" id="email" name="email" autocomplete="username" maxlength="200" required>
+      </label>
+      <label>Numéro de permis
+        <input type="text" id="numeroPermis" name="numeroPermis" maxlength="50" required>
+      </label>
+      <label>Mot de passe <span class="aide">(8 caractères minimum)</span>
+        <input type="password" id="motDePasse" name="motDePasse" autocomplete="new-password" minlength="8" maxlength="72" required>
+      </label>
+      <label>Confirmer le mot de passe
+        <input type="password" id="confirmation" name="confirmation" autocomplete="new-password" required>
+      </label>
+      <p class="message" id="message" role="alert" aria-live="assertive"></p>
+      <button type="submit" class="bouton principal">Créer mon compte</button>
+      <p class="auth-lien">Déjà inscrit ? <a href="login.html">Se connecter</a></p>
+    </form>
+  </main>
+  <script type="module" src="js/inscription.js"></script>
+</body>
+</html>
