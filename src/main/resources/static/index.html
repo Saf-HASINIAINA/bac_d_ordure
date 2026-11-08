@@ -29,7 +29,7 @@
   <main>
     <p class="message" id="message" role="status" aria-live="polite"></p>
 
-    <section class="kpis" aria-label="Indicateurs">
+    <section class="kpis" id="bloc-kpis" aria-label="Indicateurs">
       <div class="kpi"><span class="kpi-valeur" id="kpi-bacs">–</span><span class="kpi-nom">Bacs suivis</span></div>
       <div class="kpi"><span class="kpi-valeur" id="kpi-taux">–</span><span class="kpi-nom">Remplissage moyen</span></div>
       <div class="kpi"><span class="kpi-valeur" id="kpi-alertes">–</span><span class="kpi-nom">Alertes ouvertes</span></div>
@@ -37,13 +37,13 @@
       <div class="kpi"><span class="kpi-valeur" id="kpi-tonnage">–</span><span class="kpi-nom">Collecté</span></div>
     </section>
 
-    <div class="grille">
+    <div class="grille" id="grille-carte">
       <section class="bloc bloc-carte" aria-label="Carte des bacs">
         <div id="carte" role="img" aria-label="Carte des bacs et des camions"></div>
         <ul class="legende" id="legende"></ul>
       </section>
 
-      <aside class="colonne">
+      <aside class="colonne" id="colonne-alertes">
         <section class="bloc">
           <h2>Répartition des bacs</h2>
           <div class="graphique"><canvas id="graphique" aria-label="Répartition des bacs par état"></canvas></div>
