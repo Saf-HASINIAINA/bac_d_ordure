@@ -59,4 +59,28 @@ class BacTest {
         assertTrue(bac.estACollecter(80));
         assertFalse(bac.estACollecter(90));
     }
+
+    @Test
+    void horsServiceEtRemiseEnServiceRecalculeLEtat() {
+        Bac bac = nouveauBac();
+        bac.mettreAJourNiveau(85, seuils);
+        bac.mettreHorsService();
+        assertEquals(EtatBac.HORS_SERVICE, bac.getEtat());
+        bac.mettreAJourNiveau(95, seuils);
+        assertEquals(EtatBac.HORS_SERVICE, bac.getEtat(), "un bac en maintenance garde son état même si le niveau monte");
+        bac.remettreEnService(seuils);
+        assertEquals(EtatBac.CRITIQUE, bac.getEtat());
+    }
+
+    @Test
+    void modifierChangeLeBacMaisPasSonCode() {
+        Bac bac = nouveauBac();
+        Zone autre = new Zone("Autre", 12, 0, 0);
+        bac.modifier(autre, -23.4, 43.7, 500, TypeDechet.RECYCLABLE);
+        assertEquals("BAC-T", bac.getCode());
+        assertSame(autre, bac.getZone());
+        assertEquals(500, bac.getCapaciteLitres());
+        assertEquals(TypeDechet.RECYCLABLE, bac.getTypeDechet());
+        assertEquals(-23.4, bac.getLatitude());
+    }
 }

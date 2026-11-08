@@ -15,4 +15,6 @@ public interface TourneeRepository extends JpaRepository<Tournee, Long> {
     List<Tournee> findAllByOrderByIdDesc();
     List<Tournee> findByStatutAndDateBetween(StatutTournee statut, LocalDate debut, LocalDate fin);
     List<Tournee> findByStatutOrderByIdDesc(StatutTournee statut);
+    boolean existsByZoneId(Long zoneId);
+    boolean existsByCamionId(Long camionId);
 }

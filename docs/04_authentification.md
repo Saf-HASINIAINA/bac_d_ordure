@@ -16,17 +16,30 @@ section « Utilisateurs ») avant la première connexion. Un administrateur peut
 actif avec le rôle de son choix.
 
 ## Droits par rôle
-| Action | Administrateur | Superviseur | Chauffeur |
+Chaque rôle a un périmètre distinct : l'**administrateur** équipe et administre, le **superviseur** exploite au quotidien,
+le **chauffeur** exécute ses tournées.
+
+| Fonction | Administrateur | Superviseur | Chauffeur |
 |---|:-:|:-:|:-:|
-| Voir carte, bacs, alertes, statistiques | oui | oui | oui |
-| Voir les tournées | toutes | toutes | **les siennes** |
-| Planifier / annuler une tournée | oui | oui | non |
-| Démarrer, vidanger, terminer une tournée | oui | oui | **les siennes** |
+| Carte : voir bacs et camions | oui | oui | oui |
+| Indicateurs, alertes, zones, liste des chauffeurs | oui | oui | non |
 | Traiter une alerte | oui | oui | non |
-| Consulter les rapports et les exporter | oui | oui | non |
+| Planifier / annuler une tournée | oui | oui | non |
+| Voir les tournées | toutes | toutes | **les siennes** |
+| Démarrer, vidanger, terminer une tournée | oui | oui | **les siennes** |
+| Signaler un incident | oui | oui | **sur ses tournées** |
+| Mettre un bac hors service / le remettre en service | oui | oui | non |
+| Déclarer un camion en panne / le remettre à disposition | oui | oui | non |
+| **Installer, modifier, supprimer un bac** | **oui** | non | non |
+| Créer, modifier, supprimer une zone | oui | non | non |
+| Créer, modifier, supprimer un camion | oui | non | non |
+| Rapports et export CSV | oui | oui | non |
 | Gérer les comptes (lister, créer, activer, désactiver) | oui | non | non |
+| Changer son propre mot de passe | oui | oui | oui |
 
 Les droits sont appliqués **côté serveur** (`SecurityConfig` et `TourneeFacade`) ; masquer un bouton dans la page n'est qu'un confort.
+Le test `DroitsParRoleTest` vérifie cette matrice route par route pour les trois rôles : il échoue si un droit change sans que
+la matrice soit mise à jour.
 
 ## Endpoints
 | Méthode | URL | Accès |
@@ -35,6 +48,7 @@ Les droits sont appliqués **côté serveur** (`SecurityConfig` et `TourneeFacad
 | POST | `/api/auth/deconnexion` | connecté |
 | POST | `/api/auth/inscription` | public |
 | GET | `/api/auth/moi` | connecté : identité et rôle |
+| POST | `/api/auth/mot-de-passe` | connecté : changer son mot de passe |
 | GET | `/api/utilisateurs` | administrateur |
 | POST | `/api/utilisateurs` | administrateur : `{role, nom, prenom, email, motDePasse, numeroPermis}` (permis obligatoire pour un chauffeur) |
 | POST | `/api/utilisateurs/{id}/activer` | administrateur |
@@ -55,6 +69,6 @@ mvn spring-boot:run -Dspring-boot.run.arguments="--app.init-demo=true --app.rese
 
 ## Limites connues
 - Pas de limitation du nombre d'essais de connexion (à ajouter avant une mise en ligne).
-- Pas de réinitialisation du mot de passe par e-mail ni de changement de mot de passe dans l'interface.
+- Pas de réinitialisation du mot de passe par e-mail (le changement de mot de passe existe, avec l'ancien mot de passe).
 - Derrière HTTPS, activer `server.servlet.session.cookie.secure=true`.
 - Un message distinct indique qu'un compte existe mais est inactif ; l'email d'un compte existant est aussi révélé à l'inscription.

@@ -4,6 +4,7 @@ import mg.eni.tulear.ramassage.api.dto.ErreurApi;
 import mg.eni.tulear.ramassage.service.RegleMetierException;
 import mg.eni.tulear.ramassage.service.RequeteInvalideException;
 import mg.eni.tulear.ramassage.service.RessourceIntrouvableException;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
@@ -26,6 +27,12 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(RegleMetierException.class)
     public ResponseEntity<ErreurApi> regleMetier(RegleMetierException e) {
         return reponse(HttpStatus.CONFLICT, e.getMessage());
+    }
+
+    /** Filet de sécurité : une contrainte de la base (unicité, clé étrangère) refuse l'opération. */
+    @ExceptionHandler(DataIntegrityViolationException.class)
+    public ResponseEntity<ErreurApi> contrainteBase(DataIntegrityViolationException e) {
+        return reponse(HttpStatus.CONFLICT, "Opération impossible : des données liées ou en doublon l'en empêchent");
     }
 
     @ExceptionHandler(RequeteInvalideException.class)

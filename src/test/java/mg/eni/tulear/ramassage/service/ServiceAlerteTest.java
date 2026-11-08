@@ -13,6 +13,8 @@ import org.springframework.test.util.ReflectionTestUtils;
 import java.util.List;
 
 import static org.mockito.ArgumentMatchers.any;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.mockito.Mockito.*;
 
 class ServiceAlerteTest {
@@ -93,5 +95,20 @@ class ServiceAlerteTest {
         service.signalerCapteurEnPanne(bac, TypeCapteur.GAZ, 31);
         service.signalerCapteurEnPanne(bac, TypeCapteur.GAZ, 32);
         verify(repository, times(1)).save(any(Alerte.class));
+    }
+
+    @Test
+    void chaqueIncidentChauffeurCreeUneAlerteSansDedoublonnage() {
+        service.signalerIncident(bac, "Premier incident");
+        service.signalerIncident(bac, "Second incident");
+        verify(repository, times(2)).save(argThat(a -> a.getType() == TypeAlerte.INCIDENT_CHAUFFEUR));
+        verify(observateur, times(2)).notifier(any(Alerte.class));
+    }
+
+    @Test
+    void unIncidentPeutNePasConcernerDeBac() {
+        Alerte a = service.signalerIncident(null, "Camion bloqué");
+        assertNull(a.getBac());
+        assertEquals("Camion bloqué", a.getMessage());
     }
 }

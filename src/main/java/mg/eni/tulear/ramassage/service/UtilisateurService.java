@@ -76,6 +76,19 @@ public class UtilisateurService {
         return UtilisateurDto.from(u);
     }
 
+    /** Changement par l'utilisateur lui-même : l'ancien mot de passe est exigé. */
+    @Transactional
+    public void changerMotDePasse(Long id, String ancien, String nouveau) {
+        Utilisateur u = charger(id);
+        if (!passwordEncoder.matches(ancien, u.getMotDePasseHache())) {
+            throw new RequeteInvalideException("Le mot de passe actuel est incorrect");
+        }
+        if (ancien.equals(nouveau)) {
+            throw new RequeteInvalideException("Le nouveau mot de passe doit être différent de l'ancien");
+        }
+        u.changerMotDePasse(passwordEncoder.encode(nouveau));
+    }
+
     private UtilisateurDto enregistrer(Utilisateur utilisateur) {
         if (utilisateurRepository.existsByEmailIgnoreCase(utilisateur.getEmail())) {
             throw new RegleMetierException("Cet email est déjà utilisé");

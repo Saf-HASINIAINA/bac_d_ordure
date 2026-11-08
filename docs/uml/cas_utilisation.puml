@@ -17,6 +17,11 @@ rectangle "Système de gestion du ramassage" {
     usecase "S'inscrire\n(compte chauffeur en attente)" as UC_ins
     usecase "Se connecter / se déconnecter" as UC_con
   }
+  package "Parc (administrateur)" {
+    usecase "Installer, modifier, retirer\nun bac" as UC_bac
+    usecase "Gérer les zones" as UC_zone
+    usecase "Gérer les camions" as UC_cam
+  }
   package "Comptes (administrateur)" {
     usecase "Valider ou désactiver un compte" as UC_val
     usecase "Créer un compte avec un rôle" as UC_cre
@@ -27,6 +32,7 @@ rectangle "Système de gestion du ramassage" {
     usecase "Traiter une alerte" as UC_traiter
     usecase "Planifier une tournée" as UC_plan
     usecase "Annuler une tournée" as UC_ann
+    usecase "Mettre un bac ou un camion\nhors service / en service" as UC_maint
     usecase "Consulter les rapports\net exporter en CSV" as UC_rapport
   }
   package "Collecte" {
@@ -34,6 +40,8 @@ rectangle "Système de gestion du ramassage" {
     usecase "Démarrer une tournée" as UC_dem
     usecase "Confirmer la vidange d'un bac" as UC_vid
     usecase "Terminer une tournée" as UC_ter
+    usecase "Signaler un incident" as UC_inc
+    usecase "Changer son mot de passe" as UC_mdp
   }
   package "Automatique" {
     usecase "Envoyer les mesures\ndes capteurs" as UC_mesures
@@ -45,6 +53,9 @@ rectangle "Système de gestion du ramassage" {
 
 Vis --> UC_ins
 Vis --> UC_con
+Admin --> UC_bac
+Admin --> UC_zone
+Admin --> UC_cam
 Admin --> UC_val
 Admin --> UC_cre
 Sup --> UC_carte
@@ -52,11 +63,14 @@ Sup --> UC_alertes
 Sup --> UC_traiter
 Sup --> UC_plan
 Sup --> UC_ann
+Sup --> UC_maint
 Sup --> UC_rapport
 Chauf --> UC_mes
 Chauf --> UC_dem
 Chauf --> UC_vid
 Chauf --> UC_ter
+Chauf --> UC_inc
+Chauf --> UC_mdp
 Chauf --> UC_carte
 Sim --> UC_mesures
 
@@ -75,5 +89,10 @@ end note
 note bottom of UC_mes
   Un chauffeur ne voit et ne manipule
   que les tournées qui lui sont confiées.
+end note
+note right of UC_bac
+  Un bac a 3 capteurs créés avec lui.
+  Supprimable seulement s'il n'a jamais été
+  collecté, sinon : hors service.
 end note
 @enduml

@@ -7,4 +7,5 @@ import java.util.List;
 
 public interface CamionRepository extends JpaRepository<Camion, Long> {
     List<Camion> findByStatut(StatutCamion statut);
+    java.util.Optional<Camion> findByImmatriculationIgnoreCase(String immatriculation);
 }

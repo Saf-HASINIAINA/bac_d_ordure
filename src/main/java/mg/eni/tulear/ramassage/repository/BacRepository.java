@@ -18,4 +18,6 @@ public interface BacRepository extends JpaRepository<Bac, Long> {
 
     @Query("select coalesce(avg(b.niveauPourcent), 0) from Bac b")
     double niveauMoyen();
+    long countByZoneId(Long zoneId);
+    boolean existsByCode(String code);
 }
