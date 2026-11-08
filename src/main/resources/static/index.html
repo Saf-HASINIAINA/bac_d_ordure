@@ -8,123 +8,37 @@
   <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
-  <header class="entete">
-    <div>
-      <h1>Ramassage des bacs d'ordures</h1>
-      <p class="sous-titre">Commune Urbaine de Tuléar · tableau de bord</p>
-    </div>
-    <div class="entete-droite">
-      <div class="connexion" id="connexion" role="status">
-        <span class="point"></span>
-        <span id="connexion-texte">Connexion…</span>
+  <div class="app">
+    <aside class="barre" id="barre" aria-label="Navigation principale">
+      <div class="barre-marque">
+        <span class="barre-logo" aria-hidden="true">♻</span>
+        <div><strong>Ramassage</strong><span>Commune de Tuléar</span></div>
       </div>
-      <div class="utilisateur" id="utilisateur" hidden>
-        <span id="utilisateur-nom"></span>
-        <span class="badge role" id="utilisateur-role"></span>
-        <button type="button" class="bouton" id="bouton-deconnexion">Se déconnecter</button>
-      </div>
-    </div>
-  </header>
-
-  <main>
-    <p class="message" id="message" role="status" aria-live="polite"></p>
-
-    <section class="kpis" id="bloc-kpis" aria-label="Indicateurs">
-      <div class="kpi"><span class="kpi-valeur" id="kpi-bacs">–</span><span class="kpi-nom">Bacs suivis</span></div>
-      <div class="kpi"><span class="kpi-valeur" id="kpi-taux">–</span><span class="kpi-nom">Remplissage moyen</span></div>
-      <div class="kpi"><span class="kpi-valeur" id="kpi-alertes">–</span><span class="kpi-nom">Alertes ouvertes</span></div>
-      <div class="kpi"><span class="kpi-valeur" id="kpi-tournees">–</span><span class="kpi-nom">Tournées en cours</span></div>
-      <div class="kpi"><span class="kpi-valeur" id="kpi-tonnage">–</span><span class="kpi-nom">Collecté</span></div>
-    </section>
-
-    <div class="grille" id="grille-carte">
-      <section class="bloc bloc-carte" aria-label="Carte des bacs">
-        <div id="carte" role="img" aria-label="Carte des bacs et des camions"></div>
-        <ul class="legende" id="legende"></ul>
-      </section>
-
-      <aside class="colonne" id="colonne-alertes">
-        <section class="bloc">
-          <h2>Répartition des bacs</h2>
-          <div class="graphique"><canvas id="graphique" aria-label="Répartition des bacs par état"></canvas></div>
-        </section>
-        <section class="bloc">
-          <h2>Alertes à traiter <span class="compteur" id="nb-alertes">0</span></h2>
-          <ul class="alertes" id="alertes"></ul>
-        </section>
-      </aside>
-    </div>
-
-    <section class="bloc" id="bloc-planification">
-      <h2>Planifier une tournée</h2>
-      <form class="formulaire" id="form-tournee">
-        <label>Zone
-          <select id="champ-zone" required></select>
-        </label>
-        <label>Camion disponible
-          <select id="champ-camion" required></select>
-        </label>
-        <label>Chauffeur
-          <select id="champ-chauffeur" required></select>
-        </label>
-        <button type="submit" class="bouton principal">Planifier</button>
-      </form>
-    </section>
-
-    <section class="bloc">
-      <h2 id="titre-tournees">Tournées</h2>
-      <div class="tournees" id="tournees"></div>
-    </section>
-
-    <section class="bloc" id="bloc-rapport" hidden>
-      <h2>Rapport d'activité</h2>
-      <form class="formulaire" id="form-rapport">
-        <label>Du <input type="date" id="rapport-debut" required></label>
-        <label>Au <input type="date" id="rapport-fin" required></label>
-        <button type="submit" class="bouton principal">Afficher</button>
-        <a class="bouton" id="rapport-export" href="#" download>Exporter en CSV</a>
-      </form>
-      <div class="kpis kpis-rapport" id="rapport-kpis"></div>
-      <div class="rapport-grille">
-        <div class="graphique-large"><canvas id="rapport-graphique" aria-label="Tonnage collecté par jour"></canvas></div>
-        <div class="defilement">
-          <table class="tableau">
-            <thead><tr><th>Zone</th><th>Collecté</th><th>Vidanges</th><th>Tournées</th><th>Km</th></tr></thead>
-            <tbody id="rapport-zones"></tbody>
-          </table>
+      <nav class="barre-nav" id="nav" aria-label="Menu"></nav>
+      <div class="barre-pied" id="barre-pied" hidden>
+        <div class="barre-utilisateur">
+          <span class="barre-nom" id="utilisateur-nom"></span>
+          <span class="badge role" id="utilisateur-role"></span>
         </div>
+        <a class="barre-lien" href="#/compte" data-page="compte"><span class="icone" aria-hidden="true">👤</span><span class="barre-texte">Mon compte</span></a>
+        <button type="button" class="barre-lien" id="bouton-deconnexion"><span class="icone" aria-hidden="true">⎋</span><span class="barre-texte">Se déconnecter</span></button>
       </div>
-      <p class="aide" id="rapport-alertes"></p>
-    </section>
+    </aside>
+    <div class="barre-voile" id="voile" hidden></div>
 
-    <section class="bloc" id="bloc-utilisateurs" hidden>
-      <h2>Utilisateurs <span class="compteur" id="nb-attente" title="Comptes inactifs (en attente de validation ou désactivés)">0</span></h2>
-      <div class="defilement">
-        <table class="tableau">
-          <thead><tr><th>Nom</th><th>E-mail</th><th>Rôle</th><th>Statut</th><th></th></tr></thead>
-          <tbody id="utilisateurs"></tbody>
-        </table>
-      </div>
-      <details class="creation">
-        <summary>Créer un compte</summary>
-        <form class="formulaire" id="form-utilisateur">
-          <label>Rôle
-            <select id="u-role" required>
-              <option value="CHAUFFEUR">Chauffeur</option>
-              <option value="SUPERVISEUR">Superviseur</option>
-              <option value="ADMIN">Administrateur</option>
-            </select>
-          </label>
-          <label>Nom <input type="text" id="u-nom" maxlength="100" required></label>
-          <label>Prénom <input type="text" id="u-prenom" maxlength="100" required></label>
-          <label>E-mail <input type="email" id="u-email" maxlength="200" required></label>
-          <label id="u-permis-bloc">Numéro de permis <input type="text" id="u-permis" maxlength="50"></label>
-          <label>Mot de passe (8 caractères min.) <input type="password" id="u-mdp" minlength="8" maxlength="72" autocomplete="new-password" required></label>
-          <button type="submit" class="bouton principal">Créer le compte</button>
-        </form>
-      </details>
-    </section>
-  </main>
+    <div class="contenu">
+      <header class="haut">
+        <button type="button" class="menu-bouton" id="menu-bouton" aria-label="Ouvrir le menu" aria-expanded="false" aria-controls="barre">☰</button>
+        <h1 id="titre-page">Ramassage des ordures</h1>
+        <div class="connexion" id="connexion" role="status">
+          <span class="point"></span>
+          <span id="connexion-texte">Connexion…</span>
+        </div>
+      </header>
+      <p class="message" id="message" role="status" aria-live="polite"></p>
+      <main id="page" tabindex="-1"></main>
+    </div>
+  </div>
 
   <script src="vendor/leaflet/leaflet.js"></script>
   <script src="vendor/chartjs/chart.umd.js"></script>
