@@ -6,7 +6,7 @@ Voir le diagramme de déploiement (`docs/uml/images/deploiement.png`).
 
 | Couche | Paquet | Rôle |
 |---|---|---|
-| Présentation | `resources/static` | Tableau de bord (HTML, CSS, JavaScript sans framework), pages de connexion et d'inscription |
+| Présentation | `resources/static` | Interface web en JavaScript sans framework : coquille à barre latérale (`index.html`), une page par fonction (`js/pages/`), pages de connexion et d'inscription |
 | API | `api`, `api.dto` | Contrôleurs REST, DTO, traduction des erreurs (400, 401, 403, 404, 409) |
 | Sécurité | `securite` | Spring Security : session, CSRF, droits par rôle, CSP |
 | Services | `service` | Cas d'usage : tournées, mesures, alertes, comptes, rapports |
@@ -18,6 +18,15 @@ Voir le diagramme de déploiement (`docs/uml/images/deploiement.png`).
 Principes : les règles de gestion vivent dans le **domaine** (testables sans base) ; les contrôleurs ne contiennent pas de logique ;
 les DTO sont construits dans la transaction (`open-in-view` désactivé) ; Hibernate est en `ddl-auto=validate` : seul le dossier
 `supabase/migrations` modifie le schéma.
+
+## Interface web
+- **Une seule coquille** (`index.html`) avec barre latérale ; le contenu change selon l'adresse (`#/bacs`, `#/zones`...).
+- `routeur.js` : liste des pages avec la règle de visibilité de chacune. Le menu n'affiche que les pages permises au rôle, et taper
+  l'adresse d'une page interdite renvoie au tableau de bord (le serveur refuse de toute façon : l'interface n'est qu'un confort).
+- `js/pages/*.js` : chaque page expose `monter(conteneur)` et `demonter()` (arrêt des rafraîchissements, libération de la carte).
+- `api.js` : client unique de l'API (jeton CSRF, redirection sur 401). `ui.js` : messages, actions, boucle de rafraîchissement sans chevauchement.
+- `formulaire.js` : boîtes de saisie et de confirmation, avec choix d'un emplacement en cliquant sur une carte.
+- Les données reçues ne sont jamais insérées comme du HTML (`textContent` via `h()`), et la politique CSP interdit les scripts en ligne.
 
 ## Patterns de conception
 | Pattern | Où | Intérêt |

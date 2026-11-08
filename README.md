@@ -26,11 +26,27 @@ Le tableau de bord est protégé : ouvrir http://localhost:8080/ renvoie vers la
 s'inscrire, un administrateur valide ensuite son compte. Détails, droits par rôle et mot de passe oublié :
 [docs/04_authentification.md](docs/04_authentification.md).
 
-## Tableau de bord
-Une fois connecté, http://localhost:8080/ affiche : carte des bacs (couleur selon le niveau), camions,
-trajet de la tournée choisie, indicateurs, alertes à traiter, planification et suivi des tournées.
-La page se met à jour toute seule toutes les 5 secondes. Le fond de carte OpenStreetMap demande une connexion Internet ;
-le reste fonctionne sans (Leaflet et Chart.js sont embarqués dans `static/vendor/`).
+## Interface
+Après connexion, l'application affiche une **barre latérale** dont le menu dépend du rôle :
+
+| Page | Administrateur | Superviseur | Chauffeur |
+|---|:-:|:-:|:-:|
+| Tableau de bord (carte, indicateurs, alertes) | oui | oui | carte et « Ma tournée » |
+| Tournées (planifier, démarrer, vidanger, terminer, incident) | oui | oui | **les siennes** |
+| Alertes | oui | oui | non |
+| **Bacs** (installer sur la carte, modifier, supprimer, hors service) | oui | hors service seulement | non |
+| Camions (ajouter, modifier, supprimer, panne) | oui | panne seulement | non |
+| Zones | oui | non | non |
+| Rapports et export CSV | oui | oui | non |
+| Utilisateurs | oui | non | non |
+| Mon compte (changer son mot de passe) | oui | oui | oui |
+
+Les pages se mettent à jour toutes seules. Le fond de carte OpenStreetMap demande une connexion Internet ;
+le reste fonctionne sans (Leaflet et Chart.js sont embarqués dans `static/vendor/`). Sur téléphone, le menu
+se replie derrière le bouton ☰.
+
+**Installer un bac** (administrateur) : menu *Bacs*, bouton « + Installer un bac », cliquer sur la carte pour placer le bac.
+Il est créé vide avec ses trois capteurs, qui émettent aussitôt.
 
 ## Planification des tournées
 Le planificateur retient les bacs remplis à 80 % ou plus (RG2), en commençant par les plus remplis (RG5), sans dépasser
@@ -68,7 +84,7 @@ Schéma géré uniquement par les migrations : voir [docs/02_base_de_donnees.md]
 - `service/` alertes (Observer), traitement des mesures, paramètres, cycle de vie des tournées (`TourneeService`)
 - `planification/` planificateur de tournées et stratégies d'optimisation (Strategy : `PlusProcheVoisin`, `PrioriteRemplissage`)
 - `simulation/` moteur de simulation et module de communication simulé
-- `resources/static/` tableau de bord (HTML, CSS, JavaScript sans framework)
+- `resources/static/` interface web (HTML, CSS, JavaScript sans framework) : `js/pages/` une page par fonction, `js/routeur.js`, `js/formulaire.js`
 - `securite/` Spring Security : connexion par session, CSRF, droits par rôle
 - `api/` contrôleurs REST, DTO et gestion des erreurs
 - `repository/` accès aux données (Spring Data JPA)

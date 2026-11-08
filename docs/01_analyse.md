@@ -110,7 +110,7 @@ permet de faire passer « 1 jour » en quelques minutes pour la démonstration.
 | Rapports et export CSV | fait |
 | Détection des capteurs en panne (RG6) | fait |
 | Gestion du parc : installer, modifier, retirer bacs, zones et camions (API) | fait |
-| Nouvelle interface à barre latérale et pages par rôle | voir la PR suivante |
+| Interface à barre latérale, une page par fonction, menu et droits par rôle | fait |
 | Signalement d'incident par le chauffeur | fait |
 | Signalements citoyens | non réalisé (optionnel) |
 | Rapport final et soutenance | voir `06_preparation_soutenance.md` |

@@ -26,3 +26,17 @@ export function depuis(iso) {
   if (secondes < 3600) return `il y a ${Math.round(secondes / 60)} min`;
   return `il y a ${Math.round(secondes / 3600)} h`;
 }
+
+const formatDecimal = new Intl.NumberFormat('fr-FR', { maximumFractionDigits: 1 });
+export const decimal = (n) => formatDecimal.format(n);
+
+/** Date et heure locales lisibles (ex. « 07/11/2026 14:05 »). */
+export function dateHeure(iso) {
+  if (!iso) return '–';
+  return new Date(iso).toLocaleString('fr-FR', { dateStyle: 'short', timeStyle: 'short' });
+}
+
+/** Ajoute des éléments à un conteneur en ignorant null, undefined et false (append(null) écrirait le texte « null »). */
+export function insererDans(conteneur, ...enfants) {
+  conteneur.append(...enfants.flat().filter((e) => e != null && e !== false));
+}

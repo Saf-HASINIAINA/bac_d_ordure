@@ -1,20 +1,8 @@
 import { h, entier } from './dom.js';
 
-export const COULEURS = {
-  VIDE: '#2e9e5b',
-  MOYEN: '#d9a400',
-  PLEIN: '#ef7d1a',
-  CRITIQUE: '#d62f2f',
-  HORS_SERVICE: '#8a8f98',
-};
+import { COULEURS, LIBELLES_ETAT } from './libelles.js';
 
-export const LIBELLES_ETAT = {
-  VIDE: 'Vide',
-  MOYEN: 'Moyen',
-  PLEIN: 'Plein',
-  CRITIQUE: 'Critique',
-  HORS_SERVICE: 'Hors service',
-};
+export { COULEURS, LIBELLES_ETAT };
 
 const LIBELLES_CAMION = { DISPONIBLE: 'Disponible', EN_TOURNEE: 'En tournée', EN_PANNE: 'En panne' };
 
@@ -36,6 +24,11 @@ export class Carte {
     this.camions = new Map();
     this.groupeTrajet = L.layerGroup().addTo(this.carte);
     this.vueAjustee = false;
+  }
+
+  /** À appeler quand on quitte la page : libère la carte Leaflet. */
+  detruire() {
+    this.carte.remove();
   }
 
   majBacs(bacs) {
