@@ -1,6 +1,7 @@
 package mg.eni.tulear.ramassage.api;
 
 import jakarta.validation.Valid;
+import mg.eni.tulear.ramassage.api.dto.ChangerMotDePasseRequest;
 import mg.eni.tulear.ramassage.api.dto.InscriptionRequest;
 import mg.eni.tulear.ramassage.api.dto.MessageDto;
 import mg.eni.tulear.ramassage.api.dto.MoiDto;
@@ -26,6 +27,13 @@ public class AuthController {
     public MessageDto inscription(@Valid @RequestBody InscriptionRequest requete) {
         utilisateurService.inscrire(requete);
         return new MessageDto("Compte créé. Un administrateur doit le valider avant que vous puissiez vous connecter.");
+    }
+
+    @PostMapping("/mot-de-passe")
+    public MessageDto changerMotDePasse(@Valid @RequestBody ChangerMotDePasseRequest requete,
+                                        @AuthenticationPrincipal UtilisateurDetails moi) {
+        utilisateurService.changerMotDePasse(moi.getId(), requete.ancienMotDePasse(), requete.nouveauMotDePasse());
+        return new MessageDto("Mot de passe modifié.");
     }
 
     @GetMapping("/moi")

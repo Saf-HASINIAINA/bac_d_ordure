@@ -1,6 +1,8 @@
 package mg.eni.tulear.ramassage.api;
 
 import jakarta.validation.Valid;
+import mg.eni.tulear.ramassage.api.dto.AlerteDto;
+import mg.eni.tulear.ramassage.api.dto.IncidentRequest;
 import mg.eni.tulear.ramassage.api.dto.PlanifierTourneeRequest;
 import mg.eni.tulear.ramassage.api.dto.TourneeDto;
 import mg.eni.tulear.ramassage.domain.enums.StatutTournee;
@@ -48,6 +50,13 @@ public class TourneeController {
     public TourneeDto confirmerCollecte(@PathVariable Long id, @PathVariable Long bacId,
                                         @AuthenticationPrincipal UtilisateurDetails moi) {
         return tournees.confirmerCollecte(id, bacId, moi);
+    }
+
+    @PostMapping("/{id}/incidents")
+    @ResponseStatus(HttpStatus.CREATED)
+    public AlerteDto signalerIncident(@PathVariable Long id, @Valid @RequestBody IncidentRequest requete,
+                                      @AuthenticationPrincipal UtilisateurDetails moi) {
+        return tournees.signalerIncident(id, requete, moi);
     }
 
     @PostMapping("/{id}/terminer")

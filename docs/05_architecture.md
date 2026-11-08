@@ -41,7 +41,8 @@ les DTO sont construits dans la transaction (`open-in-view` désactivé) ; Hiber
 | RG7 la vidange remet le bac à 0 | `Collecte.confirmer`, `Bac.vider` | `BacTest`, `TourneeServiceTest` |
 | RG8 statuts d'une tournée | `Tournee.demarrer / terminer / annuler` | `TourneeServiceTest` |
 | RG9 inscription = chauffeur inactif | `UtilisateurService.inscrire` | `UtilisateurServiceTest`, `SecuriteApiTest` |
-| RG10 droits par rôle, tournées du chauffeur | `SecurityConfig`, `TourneeFacade` | `SecuriteApiTest`, `TourneeFacadeTest`, `RapportApiTest` |
+| RG10 droits par rôle, tournées du chauffeur | `SecurityConfig`, `TourneeFacade` | `DroitsParRoleTest` (matrice complète), `SecuriteApiTest`, `TourneeFacadeTest`, `RapportApiTest` |
+| RG11 pas de suppression avec historique, maintenance | `ParcService` | `ParcServiceTest` |
 
 Chaque règle a été vérifiée en plus par des essais réels sur un PostgreSQL jetable avec les mêmes migrations que Supabase.
 
@@ -53,7 +54,6 @@ Chaque règle a été vérifiée en plus par des essais réels sur un PostgreSQL
 - **Leaflet et Chart.js embarqués** (`static/vendor`) : l'interface fonctionne sans CDN (seules les tuiles de carte demandent Internet).
 
 ## Limites connues
-- Pas d'écran de création ou de modification des bacs, zones et camions (données de démonstration seulement).
 - Distances à vol d'oiseau (pas de routage routier) ; position du camion mise à jour à chaque vidange.
 - Poids collecté estimé à partir du niveau (densité 0,15 kg/L) ; matériel simulé.
 - Pas de limitation des essais de connexion, de réinitialisation du mot de passe par e-mail, ni de HTTPS intégré.

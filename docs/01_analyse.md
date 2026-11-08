@@ -40,11 +40,11 @@ permet de faire passer « 1 jour » en quelques minutes pour la démonstration.
 | **Système de simulation** (acteur secondaire) | Génère les mesures des capteurs et les positions GPS. |
 
 ## 4. Besoins fonctionnels
-- **BF1** Gérer les bacs (CRUD, position GPS, capacité, zone, type de déchet). — *partiel : consultation, filtres, état ; création par les données de démo, pas d'écran de création/modification*
-- **BF2** Gérer les zones/quartiers de Tuléar. — *partiel : consultation ; zones créées par les données de démo*
-- **BF3** Gérer les camions et les chauffeurs. — *partiel : comptes chauffeurs complets (inscription, validation, création) ; camions en consultation seulement*
+- **BF1** Gérer les bacs (CRUD, position GPS, capacité, zone, type de déchet). — *réalisé : l'administrateur installe, modifie et supprime un bac (supprimable tant qu'il n'a jamais été collecté) ; le superviseur le met hors service*
+- **BF2** Gérer les zones/quartiers de Tuléar. — *réalisé : l'administrateur crée, modifie et supprime une zone (si elle est vide et sans historique)*
+- **BF3** Gérer les camions et les chauffeurs. — *réalisé : camions (administrateur ; panne et remise à disposition par le superviseur) et comptes chauffeurs*
 - **BF4** Recevoir et enregistrer les mesures des capteurs (niveau, poids, gaz). — *réalisé*
-- **BF5** Générer automatiquement des alertes (bac plein, incendie, capteur en panne). — *réalisé (bac plein, risque d'incendie, capteur en panne) ; le signalement d'incident par le chauffeur n'est pas réalisé*
+- **BF5** Générer automatiquement des alertes (bac plein, incendie, capteur en panne). — *réalisé : bac plein, risque d'incendie, capteur en panne, incident signalé par un chauffeur*
 - **BF6** Planifier automatiquement des tournées optimisées (bacs prioritaires, capacité du camion). — *réalisé (deux stratégies : plus proche voisin, priorité au remplissage)*
 - **BF7** Affecter une tournée à un camion et un chauffeur. — *réalisé*
 - **BF8** Suivre en temps réel la position des camions et l'avancement de la tournée. — *partiel : la position du camion est mise à jour à chaque vidange, pas de trajet GPS continu*
@@ -56,6 +56,8 @@ permet de faire passer « 1 jour » en quelques minutes pour la démonstration.
 
 - **BF14** Inscription publique et validation des comptes par un administrateur — *réalisé*.
 - **BF15** Export CSV des vidanges — *réalisé*.
+- **BF16** Signalement d'un incident par le chauffeur sur sa tournée — *réalisé*.
+- **BF17** Changement de son mot de passe — *réalisé*.
 
 ## 5. Besoins non fonctionnels
 - Sécurité : authentification, mots de passe hachés, contrôle d'accès par rôle.
@@ -74,7 +76,8 @@ permet de faire passer « 1 jour » en quelques minutes pour la démonstration.
 - **RG7** La confirmation de collecte remet le niveau du bac à 0 et enregistre le poids collecté.
 - **RG8** Une tournée a le statut : *Planifiée → En cours → Terminée* (ou *Annulée*).
 - **RG9** L'inscription publique crée toujours un chauffeur inactif ; seul un administrateur peut l'activer ou créer un compte avec un autre rôle.
-- **RG10** Un chauffeur ne voit et ne manipule que les tournées qui lui sont confiées ; planifier, annuler, traiter une alerte et consulter les rapports sont réservés aux superviseurs et administrateurs.
+- **RG10** Droits par rôle (voir `04_authentification.md`) : un chauffeur ne voit et ne manipule que les tournées qui lui sont confiées ; planifier, annuler, traiter une alerte, consulter les rapports sont réservés aux superviseurs et administrateurs ; installer ou retirer un bac, une zone ou un camion est réservé à l'administrateur.
+- **RG11** Un bac, une zone ou un camion qui a un historique (collectes, tournées) ne peut pas être supprimé : on le met hors service. Un bac prévu dans une tournée en cours ne peut pas être mis hors service.
 
 ## 7. Choix techniques
 | Couche | Choix |
@@ -106,8 +109,10 @@ permet de faire passer « 1 jour » en quelques minutes pour la démonstration.
 | Authentification, inscription, droits par rôle | fait |
 | Rapports et export CSV | fait |
 | Détection des capteurs en panne (RG6) | fait |
-| Écrans de gestion des bacs, zones et camions (création, modification) | à faire |
-| Signalement d'incident par le chauffeur, signalements citoyens | à faire (optionnel) |
+| Gestion du parc : installer, modifier, retirer bacs, zones et camions (API) | fait |
+| Nouvelle interface à barre latérale et pages par rôle | voir la PR suivante |
+| Signalement d'incident par le chauffeur | fait |
+| Signalements citoyens | non réalisé (optionnel) |
 | Rapport final et soutenance | voir `06_preparation_soutenance.md` |
 
 ## 10. Dossier des diagrammes

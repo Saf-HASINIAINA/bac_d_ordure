@@ -1,8 +1,13 @@
 package mg.eni.tulear.ramassage.service;
 
+import mg.eni.tulear.ramassage.api.dto.AlerteDto;
+import mg.eni.tulear.ramassage.api.dto.IncidentRequest;
 import mg.eni.tulear.ramassage.api.dto.TourneeDto;
 import mg.eni.tulear.ramassage.domain.*;
 import mg.eni.tulear.ramassage.domain.enums.Role;
+import mg.eni.tulear.ramassage.domain.enums.StatutTournee;
+import mg.eni.tulear.ramassage.domain.enums.TypeAlerte;
+import mg.eni.tulear.ramassage.domain.enums.TypeDechet;
 import mg.eni.tulear.ramassage.repository.TourneeRepository;
 import mg.eni.tulear.ramassage.securite.UtilisateurDetails;
 import org.junit.jupiter.api.BeforeEach;
@@ -14,12 +19,15 @@ import java.util.List;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 
 class TourneeFacadeTest {
 
     private TourneeService tourneeService;
     private TourneeRepository tourneeRepository;
+    private ServiceAlerte serviceAlerte;
     private TourneeFacade facade;
     private Tournee tourneeDePaul;
     private Tournee tourneeDeMarie;
@@ -44,7 +52,8 @@ class TourneeFacadeTest {
     void init() {
         tourneeService = mock(TourneeService.class);
         tourneeRepository = mock(TourneeRepository.class);
-        facade = new TourneeFacade(tourneeService, tourneeRepository);
+        serviceAlerte = mock(ServiceAlerte.class);
+        facade = new TourneeFacade(tourneeService, tourneeRepository, serviceAlerte);
         tourneeDePaul = tournee(10L, 3L);
         tourneeDeMarie = tournee(11L, 4L);
         when(tourneeRepository.findAllByOrderByIdDesc()).thenReturn(List.of(tourneeDeMarie, tourneeDePaul));
@@ -91,5 +100,69 @@ class TourneeFacadeTest {
     void unSuperviseurPeutAgirSurLaTourneeDeNImporteQuiChauffeur() {
         when(tourneeService.demarrer(11L)).thenReturn(tourneeDeMarie);
         assertEquals(11L, facade.demarrer(11L, moi(Role.SUPERVISEUR, 2L)).id());
+    }
+
+    /* ---------- incidents ---------- */
+
+    private Bac bacDansLaTournee(Tournee t, long id, String code) {
+        Bac bac = new Bac(code, t.getZone(), 0, 0, 240, TypeDechet.MENAGER);
+        ReflectionTestUtils.setField(bac, "id", id);
+        t.ajouterCollecte(new Collecte(t, bac, 1));
+        return bac;
+    }
+
+    private void alerteRenvoyee() {
+        when(serviceAlerte.signalerIncident(any(), any())).thenAnswer(inv ->
+                new Alerte(TypeAlerte.INCIDENT_CHAUFFEUR, inv.getArgument(1), inv.getArgument(0)));
+    }
+
+    @Test
+    void unChauffeurSignaleUnIncidentSurUnBacDeSaTournee() {
+        Bac bac = bacDansLaTournee(tourneeDePaul, 50L, "BAC-050");
+        alerteRenvoyee();
+
+        AlerteDto dto = facade.signalerIncident(10L, new IncidentRequest("  Accès bloqué par un camion  ", 50L),
+                new UtilisateurDetails(3L, "Rasoa", "Paul", "p@tulear.mg", "h", Role.CHAUFFEUR, true));
+
+        verify(serviceAlerte).signalerIncident(eq(bac), argThat(m ->
+                m.contains("Paul Rasoa") && m.contains("n°10") && m.contains("BAC-050") && m.contains("Accès bloqué par un camion")));
+        assertEquals(TypeAlerte.INCIDENT_CHAUFFEUR, dto.type());
+    }
+
+    @Test
+    void unIncidentPeutEtreGeneralSansBac() {
+        alerteRenvoyee();
+        facade.signalerIncident(10L, new IncidentRequest("Panne de camion", null), moi(Role.CHAUFFEUR, 3L));
+        verify(serviceAlerte).signalerIncident(eq(null), argThat(m -> m.contains("Panne de camion") && !m.contains("bac ")));
+    }
+
+    @Test
+    void unChauffeurNePeutPasSignalerUnIncidentSurLaTourneeDUnAutre() {
+        assertThrows(AccessDeniedException.class,
+                () -> facade.signalerIncident(11L, new IncidentRequest("Panne", null), moi(Role.CHAUFFEUR, 3L)));
+        verifyNoInteractions(serviceAlerte);
+    }
+
+    @Test
+    void unIncidentSurUnBacHorsTourneeEstRefuse() {
+        bacDansLaTournee(tourneeDePaul, 50L, "BAC-050");
+        assertThrows(RegleMetierException.class,
+                () -> facade.signalerIncident(10L, new IncidentRequest("Bac cassé", 99L), moi(Role.CHAUFFEUR, 3L)));
+        verifyNoInteractions(serviceAlerte);
+    }
+
+    @Test
+    void unIncidentSurUneTourneeTermineeEstRefuse() {
+        tourneeDePaul.demarrer();
+        tourneeDePaul.terminer();
+        assertEquals(StatutTournee.TERMINEE, tourneeDePaul.getStatut());
+        assertThrows(RegleMetierException.class,
+                () -> facade.signalerIncident(10L, new IncidentRequest("Trop tard", null), moi(Role.CHAUFFEUR, 3L)));
+    }
+
+    @Test
+    void unSuperviseurPeutSignalerUnIncidentSurUneTourneeDeNImporteQui() {
+        alerteRenvoyee();
+        assertDoesNotThrow(() -> facade.signalerIncident(11L, new IncidentRequest("Constat sur place", null), moi(Role.SUPERVISEUR, 2L)));
     }
 }

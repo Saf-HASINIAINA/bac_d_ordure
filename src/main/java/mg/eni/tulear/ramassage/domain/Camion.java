@@ -45,6 +45,11 @@ public class Camion {
         chargeActuelleKg += kg;
     }
 
+    public void modifier(String immatriculation, double capaciteKg) {
+        this.immatriculation = immatriculation;
+        this.capaciteKg = capaciteKg;
+    }
+
     public void decharger() { chargeActuelleKg = 0; }
 
     public void deplacerVers(double latitude, double longitude) {
