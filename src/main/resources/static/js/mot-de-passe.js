@@ -1,6 +1,11 @@
 import { postJson, afficherMessage } from './auth.js';
 
 const formulaire = document.getElementById('form-mot-de-passe');
+const obligatoire = new URLSearchParams(location.search).get('obligatoire') === '1';
+if (obligatoire) { // pas de retour possible tant que le mot de passe n'est pas changé
+  document.getElementById('avis-obligatoire').hidden = false;
+  document.getElementById('lien-retour').hidden = true;
+}
 
 formulaire.addEventListener('submit', async (evenement) => {
   evenement.preventDefault();
@@ -31,6 +36,7 @@ formulaire.addEventListener('submit', async (evenement) => {
   if (ok) {
     formulaire.reset();
     afficherMessage('Mot de passe modifié.', 'succes');
+    if (obligatoire) setTimeout(() => location.replace('/'), 1200);
     return;
   }
   formulaire.ancien.focus();

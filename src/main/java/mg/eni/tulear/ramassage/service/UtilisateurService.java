@@ -53,6 +53,7 @@ public class UtilisateurService {
                 yield new Chauffeur(nom, prenom, email, hash, r.numeroPermis().trim());
             }
         };
+        utilisateur.imposerMotDePasse(hash); // l'administrateur connaît ce mot de passe : l'intéressé doit le remplacer
         return enregistrer(utilisateur);
     }
 
@@ -104,7 +105,7 @@ public class UtilisateurService {
         }
         Utilisateur u = charger(id);
         String temporaire = generateur.generer();
-        u.changerMotDePasse(passwordEncoder.encode(temporaire));
+        u.imposerMotDePasse(passwordEncoder.encode(temporaire));
         return temporaire;
     }
 
@@ -113,7 +114,7 @@ public class UtilisateurService {
     public void reinitialiserParEmail(String email, String nouveauMotDePasse) {
         Utilisateur u = utilisateurRepository.findByEmailIgnoreCase(normaliser(email))
                 .orElseThrow(() -> new RessourceIntrouvableException("Aucun compte avec l'e-mail : " + email));
-        u.changerMotDePasse(passwordEncoder.encode(nouveauMotDePasse));
+        u.imposerMotDePasse(passwordEncoder.encode(nouveauMotDePasse));
     }
 
     private UtilisateurDto enregistrer(Utilisateur utilisateur) {

@@ -29,6 +29,10 @@ public abstract class Utilisateur {
     @Column(nullable = false)
     private boolean actif = true;
 
+    /** Vrai tant que l'utilisateur utilise un mot de passe qu'il n'a pas choisi (temporaire, ou fixé par un administrateur). */
+    @Column(name = "mdp_a_changer", nullable = false)
+    private boolean mdpAChanger = false;
+
     protected Utilisateur() { }
 
     protected Utilisateur(String nom, String prenom, String email, String motDePasseHache) {
@@ -47,5 +51,17 @@ public abstract class Utilisateur {
     public String getMotDePasseHache() { return motDePasseHache; }
     public boolean isActif() { return actif; }
     public void setActif(boolean actif) { this.actif = actif; }
-    public void changerMotDePasse(String motDePasseHache) { this.motDePasseHache = motDePasseHache; }
+    public boolean isMdpAChanger() { return mdpAChanger; }
+
+    /** Le mot de passe est choisi par l'utilisateur lui-même : plus rien à imposer. */
+    public void changerMotDePasse(String motDePasseHache) {
+        this.motDePasseHache = motDePasseHache;
+        this.mdpAChanger = false;
+    }
+
+    /** Mot de passe fixé par quelqu'un d'autre (administrateur, commande de secours) : à remplacer à la prochaine connexion. */
+    public void imposerMotDePasse(String motDePasseHache) {
+        this.motDePasseHache = motDePasseHache;
+        this.mdpAChanger = true;
+    }
 }

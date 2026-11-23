@@ -92,13 +92,23 @@ mvn spring-boot:run -Dspring-boot.run.arguments="--app.init-demo=true --app.rese
 ## Mot de passe oublié
 - **Chauffeur ou superviseur** : un administrateur clique sur « Réinitialiser le mot de passe » (section « Utilisateurs »).
   Un mot de passe temporaire aléatoire de 12 caractères s'affiche une seule fois ; l'administrateur le communique
-  et l'utilisateur le change avec le bouton « Mot de passe ». Seul le hash BCrypt est conservé.
+  et l'utilisateur doit le remplacer dès sa première connexion (voir ci-dessous). Seul le hash BCrypt est conservé.
 - **Administrateur** (personne d'autre pour le débloquer) : commande de secours, depuis le serveur :
   ```bash
   mvn spring-boot:run -Dspring-boot.run.arguments="--app.reset-password-email=admin@tulear.mg"
   ```
   Ajouter `--app.new-password=...` pour choisir la valeur, sinon elle est générée et affichée dans la console.
   L'application s'arrête ensuite. Cette commande exige l'accès au serveur et à `.env`.
+
+## Changement de mot de passe obligatoire
+Un mot de passe fixé par quelqu'un d'autre (réinitialisation par un administrateur, création de compte par un administrateur,
+commande de secours) met l'indicateur `mdp_a_changer` à vrai. Tant qu'il l'est :
+- le navigateur est redirigé vers `mot-de-passe.html?obligatoire=1` (sans lien de retour) ;
+- **côté serveur**, `FiltreChangementMotDePasse` répond 403 à toute requête de l'API sauf `/api/auth/mot-de-passe`,
+  `/api/auth/moi` et `/api/auth/deconnexion` : contourner la redirection ne sert à rien ;
+- l'indicateur retombe à faux dès que l'utilisateur choisit lui-même son mot de passe (également dans sa session en cours).
+Les inscriptions publiques et les comptes de démonstration ne sont pas concernés : leur titulaire a choisi le mot de passe.
+Migration : `20261124100000_mdp_a_changer.sql` (appliquée par `./lancer.sh`).
 
 ## Limites connues
 - Le journal d'audit n'est pas inviolable (un administrateur de la base peut le modifier) et n'est pas purgé automatiquement.
