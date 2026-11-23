@@ -34,7 +34,7 @@ le **chauffeur** exécute ses tournées.
 | Créer, modifier, supprimer une zone | oui | non | non |
 | Créer, modifier, supprimer un camion | oui | non | non |
 | Rapports et export CSV | oui | oui | non |
-| Gérer les comptes (lister, créer, activer, désactiver) | oui | non | non |
+| Gérer les comptes (lister, créer, activer, désactiver, réinitialiser un mot de passe) | oui | non | non |
 | Changer son propre mot de passe | oui | oui | oui |
 
 Les droits sont appliqués **côté serveur** (`SecurityConfig` et `TourneeFacade`) ; masquer un bouton dans la page n'est qu'un confort.
@@ -53,6 +53,7 @@ la matrice soit mise à jour.
 | POST | `/api/utilisateurs` | administrateur : `{role, nom, prenom, email, motDePasse, numeroPermis}` (permis obligatoire pour un chauffeur) |
 | POST | `/api/utilisateurs/{id}/activer` | administrateur |
 | POST | `/api/utilisateurs/{id}/desactiver` | administrateur (pas son propre compte) |
+| POST | `/api/utilisateurs/{id}/reinitialiser-mot-de-passe` | administrateur (pas son propre compte) : renvoie `{motDePasse}` temporaire, affiché une seule fois |
 
 Codes d'erreur : 401 non connecté ou identifiants invalides, 403 droits insuffisants ou jeton CSRF absent,
 409 email déjà utilisé, 400 données invalides.
@@ -67,8 +68,19 @@ mvn spring-boot:run -Dspring-boot.run.arguments="--app.init-demo=true --app.rese
 ```
 (ajouter `--app.demo-password=...` pour choisir la valeur, sinon elle est générée et affichée).
 
+## Mot de passe oublié
+- **Chauffeur ou superviseur** : un administrateur clique sur « Réinitialiser le mot de passe » (section « Utilisateurs »).
+  Un mot de passe temporaire aléatoire de 12 caractères s'affiche une seule fois ; l'administrateur le communique
+  et l'utilisateur le change avec le bouton « Mot de passe ». Seul le hash BCrypt est conservé.
+- **Administrateur** (personne d'autre pour le débloquer) : commande de secours, depuis le serveur :
+  ```bash
+  mvn spring-boot:run -Dspring-boot.run.arguments="--app.reset-password-email=admin@tulear.mg"
+  ```
+  Ajouter `--app.new-password=...` pour choisir la valeur, sinon elle est générée et affichée dans la console.
+  L'application s'arrête ensuite. Cette commande exige l'accès au serveur et à `.env`.
+
 ## Limites connues
 - Pas de limitation du nombre d'essais de connexion (à ajouter avant une mise en ligne).
-- Pas de réinitialisation du mot de passe par e-mail (le changement de mot de passe existe, avec l'ancien mot de passe).
+- Pas de réinitialisation du mot de passe par e-mail (réinitialisation par un administrateur ou commande de secours). Le mot de passe temporaire n'est pas à changer obligatoirement à la première connexion.
 - Derrière HTTPS, activer `server.servlet.session.cookie.secure=true`.
 - Un message distinct indique qu'un compte existe mais est inactif ; l'email d'un compte existant est aussi révélé à l'inscription.

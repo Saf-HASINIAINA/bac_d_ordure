@@ -2,6 +2,7 @@ package mg.eni.tulear.ramassage.api;
 
 import jakarta.validation.Valid;
 import mg.eni.tulear.ramassage.api.dto.CreerUtilisateurRequest;
+import mg.eni.tulear.ramassage.api.dto.MotDePasseTemporaireDto;
 import mg.eni.tulear.ramassage.api.dto.UtilisateurDto;
 import mg.eni.tulear.ramassage.securite.UtilisateurDetails;
 import mg.eni.tulear.ramassage.service.UtilisateurService;
@@ -41,5 +42,11 @@ public class UtilisateurController {
     @PostMapping("/{id}/desactiver")
     public UtilisateurDto desactiver(@PathVariable Long id, @AuthenticationPrincipal UtilisateurDetails moi) {
         return utilisateurService.desactiver(id, moi.getId());
+    }
+
+    @PostMapping("/{id}/reinitialiser-mot-de-passe")
+    public MotDePasseTemporaireDto reinitialiserMotDePasse(@PathVariable Long id,
+                                                           @AuthenticationPrincipal UtilisateurDetails moi) {
+        return new MotDePasseTemporaireDto(utilisateurService.reinitialiserMotDePasse(id, moi.getId()));
     }
 }

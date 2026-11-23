@@ -160,6 +160,23 @@ class SecuriteApiTest {
     }
 
     @Test
+    void reinitialiserRenvoieLeMotDePasseTemporaireEtTransmetLIdentite() throws Exception {
+        when(utilisateurService.reinitialiserMotDePasse(9L, 1L)).thenReturn("Temporaire23");
+        mvc.perform(post("/api/utilisateurs/9/reinitialiser-mot-de-passe").with(ADMIN).with(csrf()))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.motDePasse").value("Temporaire23"));
+    }
+
+    @Test
+    void reinitialiserEstInterditAuxAutresRoles() throws Exception {
+        for (RequestPostProcessor qui : List.of(SUPERVISEUR, CHAUFFEUR)) {
+            mvc.perform(post("/api/utilisateurs/9/reinitialiser-mot-de-passe").with(qui).with(csrf()))
+                    .andExpect(status().isForbidden());
+        }
+        verify(utilisateurService, never()).reinitialiserMotDePasse(any(), any());
+    }
+
+    @Test
     void desactiverUnCompteTransmetLIdentiteDeLAdministrateur() throws Exception {
         when(utilisateurService.desactiver(eq(9L), eq(1L)))
                 .thenReturn(new UtilisateurDto(9L, "A", "B", "a@b.mg", Role.CHAUFFEUR, false, "P1"));

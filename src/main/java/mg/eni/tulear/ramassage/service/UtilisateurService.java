@@ -18,10 +18,13 @@ public class UtilisateurService {
 
     private final UtilisateurRepository utilisateurRepository;
     private final PasswordEncoder passwordEncoder;
+    private final GenerateurMotDePasse generateur;
 
-    public UtilisateurService(UtilisateurRepository utilisateurRepository, PasswordEncoder passwordEncoder) {
+    public UtilisateurService(UtilisateurRepository utilisateurRepository, PasswordEncoder passwordEncoder,
+                              GenerateurMotDePasse generateur) {
         this.utilisateurRepository = utilisateurRepository;
         this.passwordEncoder = passwordEncoder;
+        this.generateur = generateur;
     }
 
     /** Inscription publique : toujours un chauffeur, inactif tant qu'un administrateur ne l'a pas validé. */
@@ -87,6 +90,30 @@ public class UtilisateurService {
             throw new RequeteInvalideException("Le nouveau mot de passe doit être différent de l'ancien");
         }
         u.changerMotDePasse(passwordEncoder.encode(nouveau));
+    }
+
+    /**
+     * Mot de passe oublié : l'administrateur génère un mot de passe temporaire pour un autre compte.
+     * @param moiId l'administrateur qui agit : pour son propre compte, il utilise le changement de mot de passe.
+     * @return le mot de passe en clair, à communiquer une seule fois (seul le hash est conservé)
+     */
+    @Transactional
+    public String reinitialiserMotDePasse(Long id, Long moiId) {
+        if (id.equals(moiId)) {
+            throw new RegleMetierException("Pour votre propre compte, utilisez « Mot de passe » (changement avec l'ancien)");
+        }
+        Utilisateur u = charger(id);
+        String temporaire = generateur.generer();
+        u.changerMotDePasse(passwordEncoder.encode(temporaire));
+        return temporaire;
+    }
+
+    /** Commande de secours (serveur) : réinitialise n'importe quel compte, y compris le dernier administrateur. */
+    @Transactional
+    public void reinitialiserParEmail(String email, String nouveauMotDePasse) {
+        Utilisateur u = utilisateurRepository.findByEmailIgnoreCase(normaliser(email))
+                .orElseThrow(() -> new RessourceIntrouvableException("Aucun compte avec l'e-mail : " + email));
+        u.changerMotDePasse(passwordEncoder.encode(nouveauMotDePasse));
     }
 
     private UtilisateurDto enregistrer(Utilisateur utilisateur) {

@@ -98,7 +98,8 @@ class DroitsParRoleTest {
             new Route(HttpMethod.GET, "/api/utilisateurs", null, ADMIN),
             new Route(HttpMethod.POST, "/api/utilisateurs", COMPTE, ADMIN),
             new Route(HttpMethod.POST, "/api/utilisateurs/1/activer", null, ADMIN),
-            new Route(HttpMethod.POST, "/api/utilisateurs/1/desactiver", null, ADMIN));
+            new Route(HttpMethod.POST, "/api/utilisateurs/1/desactiver", null, ADMIN),
+            new Route(HttpMethod.POST, "/api/utilisateurs/1/reinitialiser-mot-de-passe", null, ADMIN));
 
     @Autowired MockMvc mvc;
     @MockBean ConsultationService consultation;
