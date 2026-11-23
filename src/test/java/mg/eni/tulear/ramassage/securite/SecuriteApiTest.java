@@ -171,6 +171,41 @@ class SecuriteApiTest {
                 .andExpect(jsonPath("$.password").doesNotExist());
     }
 
+    /* ---------- changement de mot de passe ---------- */
+
+    private static final String CHANGEMENT = "{\"ancienMotDePasse\":\"ancienmdp1\",\"nouveauMotDePasse\":\"nouveaumdp1\"}";
+
+    @Test
+    void changerMotDePasseExigeUneConnexion() throws Exception {
+        mvc.perform(post("/api/auth/mot-de-passe").with(csrf()).contentType(MediaType.APPLICATION_JSON).content(CHANGEMENT))
+                .andExpect(status().isUnauthorized());
+        verifyNoInteractions(utilisateurService);
+    }
+
+    @Test
+    void chaqueRolePeutChangerSonMotDePasse() throws Exception {
+        for (RequestPostProcessor qui : List.of(ADMIN, SUPERVISEUR, CHAUFFEUR)) {
+            mvc.perform(post("/api/auth/mot-de-passe").with(qui).with(csrf())
+                            .contentType(MediaType.APPLICATION_JSON).content(CHANGEMENT))
+                    .andExpect(status().isOk());
+        }
+        verify(utilisateurService).changerMotDePasse(3L, "ancienmdp1", "nouveaumdp1");
+    }
+
+    @Test
+    void changerMotDePasseSansJetonCsrfEstRefuse() throws Exception {
+        mvc.perform(post("/api/auth/mot-de-passe").with(CHAUFFEUR).contentType(MediaType.APPLICATION_JSON).content(CHANGEMENT))
+                .andExpect(status().isForbidden());
+    }
+
+    @Test
+    void changerMotDePasseTropCourtRenvoie400() throws Exception {
+        mvc.perform(post("/api/auth/mot-de-passe").with(CHAUFFEUR).with(csrf()).contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"ancienMotDePasse\":\"ancienmdp1\",\"nouveauMotDePasse\":\"court\"}"))
+                .andExpect(status().isBadRequest());
+        verifyNoInteractions(utilisateurService);
+    }
+
     /* ---------- inscription publique ---------- */
 
     private static final String INSCRIPTION =

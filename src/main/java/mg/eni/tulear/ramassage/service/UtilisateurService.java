@@ -12,7 +12,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
-/** Inscription, création et activation des comptes. */
+/** Inscription, création, activation des comptes et changement de mot de passe. */
 @Service
 public class UtilisateurService {
 
@@ -74,6 +74,19 @@ public class UtilisateurService {
         Utilisateur u = charger(id);
         u.setActif(false);
         return UtilisateurDto.from(u);
+    }
+
+    /** Changement du mot de passe par son propriétaire : l'ancien mot de passe doit être correct. */
+    @Transactional
+    public void changerMotDePasse(Long moiId, String ancien, String nouveau) {
+        Utilisateur u = charger(moiId);
+        if (!passwordEncoder.matches(ancien, u.getMotDePasseHache())) {
+            throw new RegleMetierException("Le mot de passe actuel est incorrect");
+        }
+        if (passwordEncoder.matches(nouveau, u.getMotDePasseHache())) {
+            throw new RegleMetierException("Le nouveau mot de passe doit être différent de l'actuel");
+        }
+        u.changerMotDePasse(passwordEncoder.encode(nouveau));
     }
 
     private UtilisateurDto enregistrer(Utilisateur utilisateur) {

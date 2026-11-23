@@ -104,4 +104,32 @@ class UtilisateurServiceTest {
         when(repository.findById(99L)).thenReturn(Optional.empty());
         assertThrows(RessourceIntrouvableException.class, () -> service.activer(99L));
     }
+
+    @Test
+    void changerMotDePasseEnregistreLeNouveauHache() {
+        Chauffeur c = new Chauffeur("N", "P", "c@tulear.mg", encodeur.encode("ancienmdp1"), "P1");
+        when(repository.findById(4L)).thenReturn(Optional.of(c));
+
+        service.changerMotDePasse(4L, "ancienmdp1", "nouveaumdp1");
+
+        assertTrue(encodeur.matches("nouveaumdp1", c.getMotDePasseHache()));
+        assertFalse(encodeur.matches("ancienmdp1", c.getMotDePasseHache()));
+    }
+
+    @Test
+    void changerMotDePasseRefuseUnAncienMotDePasseIncorrect() {
+        String hash = encodeur.encode("ancienmdp1");
+        Chauffeur c = new Chauffeur("N", "P", "c@tulear.mg", hash, "P1");
+        when(repository.findById(4L)).thenReturn(Optional.of(c));
+
+        assertThrows(RegleMetierException.class, () -> service.changerMotDePasse(4L, "faux-mdp-1", "nouveaumdp1"));
+        assertEquals(hash, c.getMotDePasseHache(), "le mot de passe ne doit pas changer");
+    }
+
+    @Test
+    void changerMotDePasseRefuseLeMemeMotDePasse() {
+        Chauffeur c = new Chauffeur("N", "P", "c@tulear.mg", encodeur.encode("ancienmdp1"), "P1");
+        when(repository.findById(4L)).thenReturn(Optional.of(c));
+        assertThrows(RegleMetierException.class, () -> service.changerMotDePasse(4L, "ancienmdp1", "ancienmdp1"));
+    }
 }

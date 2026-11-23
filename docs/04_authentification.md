@@ -34,6 +34,7 @@ Les droits sont appliqués **côté serveur** (`SecurityConfig` et `TourneeFacad
 | POST | `/api/auth/connexion` | public (formulaire) |
 | POST | `/api/auth/deconnexion` | connecté |
 | POST | `/api/auth/inscription` | public |
+| POST | `/api/auth/mot-de-passe` | connecté : `{ancienMotDePasse, nouveauMotDePasse}` (page `mot-de-passe.html`, bouton « Mot de passe » du tableau de bord) |
 | GET | `/api/auth/moi` | connecté : identité et rôle |
 | GET | `/api/utilisateurs` | administrateur |
 | POST | `/api/utilisateurs` | administrateur : `{role, nom, prenom, email, motDePasse, numeroPermis}` (permis obligatoire pour un chauffeur) |
@@ -55,6 +56,6 @@ mvn spring-boot:run -Dspring-boot.run.arguments="--app.init-demo=true --app.rese
 
 ## Limites connues
 - Pas de limitation du nombre d'essais de connexion (à ajouter avant une mise en ligne).
-- Pas de réinitialisation du mot de passe par e-mail ni de changement de mot de passe dans l'interface.
+- Pas de réinitialisation du mot de passe par e-mail : un mot de passe oublié se réinitialise par l'administrateur ou, pour les comptes de démo, par la commande ci-dessus. Le changement de mot de passe (ancien mot de passe exigé) ne déconnecte pas les autres sessions ouvertes.
 - Derrière HTTPS, activer `server.servlet.session.cookie.secure=true`.
 - Un message distinct indique qu'un compte existe mais est inactif ; l'email d'un compte existant est aussi révélé à l'inscription.
