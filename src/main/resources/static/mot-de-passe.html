@@ -1,0 +1,33 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Changer le mot de passe - Ramassage des ordures</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body class="page-auth">
+  <main class="auth">
+    <h1>Ramassage des bacs d'ordures</h1>
+    <p class="sous-titre">Commune Urbaine de Tuléar</p>
+
+    <form class="auth-formulaire" id="form-mot-de-passe" novalidate>
+      <h2>Changer mon mot de passe</h2>
+      <label>Mot de passe actuel
+        <input type="password" id="ancien" name="ancien" autocomplete="current-password" required autofocus>
+      </label>
+      <label>Nouveau mot de passe
+        <input type="password" id="nouveau" name="nouveau" autocomplete="new-password" minlength="8" maxlength="72" required>
+      </label>
+      <label>Confirmer le nouveau mot de passe
+        <input type="password" id="confirmation" name="confirmation" autocomplete="new-password" required>
+      </label>
+      <p class="aide">Entre 8 et 72 caractères.</p>
+      <p class="message" id="message" role="alert" aria-live="assertive"></p>
+      <button type="submit" class="bouton principal">Enregistrer</button>
+      <p class="auth-lien"><a href="/">Retour au tableau de bord</a></p>
+    </form>
+  </main>
+  <script type="module" src="js/mot-de-passe.js"></script>
+</body>
+</html>
