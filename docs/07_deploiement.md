@@ -51,3 +51,12 @@ dans l'image (`.env` est exclu par `.dockerignore`).
 - Choisir de vrais mots de passe (jamais ceux de démonstration) et changer ceux des comptes de démo.
 - Une seule instance : la limitation des essais de connexion est en mémoire (voir `docs/04_authentification.md`).
 - Le plan gratuit de Supabase est limité à 500 Mo : la simulation purge les mesures après 2 jours.
+
+## 4. Choix des migrations (pourquoi pas Flyway)
+Deux chemins existent, volontairement séparés :
+- **Supabase (réel)** : `npx supabase db push` applique les fichiers de `supabase/migrations`. Rien n'est lancé au démarrage de l'application, qui vérifie seulement le schéma (`ddl-auto=validate`).
+- **Docker** : le service `migrations` du `docker-compose.yml` applique les mêmes fichiers sur la base locale.
+
+Un outil de migration intégré à l'application (Flyway ou Liquibase) a été écarté : il imposerait de renommer les fichiers,
+de déclarer la base Supabase actuelle comme déjà à jour et d'abandonner `supabase db push`, avec un risque sur la base réelle.
+**Évolution possible** : adopter Flyway, avec une ligne de base (`baselineOnMigrate`) posée sur la version actuelle du schéma.
