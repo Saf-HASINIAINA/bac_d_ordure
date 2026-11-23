@@ -29,7 +29,7 @@ class UtilisateurServiceTest {
     void init() {
         repository = mock(UtilisateurRepository.class);
         when(repository.saveAndFlush(any(Utilisateur.class))).thenAnswer(inv -> inv.getArgument(0));
-        service = new UtilisateurService(repository, encodeur);
+        service = new UtilisateurService(repository, encodeur, new GenerateurMotDePasse());
     }
 
     private InscriptionRequest inscription() {
@@ -132,5 +132,52 @@ class UtilisateurServiceTest {
         Chauffeur c = new Chauffeur("N", "P", "c@tulear.mg", encodeur.encode("ancien-mdp-1"), "P1");
         when(repository.findById(3L)).thenReturn(Optional.of(c));
         assertThrows(RequeteInvalideException.class, () -> service.changerMotDePasse(3L, "ancien-mdp-1", "ancien-mdp-1"));
+    }
+
+    @Test
+    void reinitialiserGenereUnMotDePasseTemporaireQuiFonctionne() {
+        Chauffeur c = new Chauffeur("N", "P", "c@tulear.mg", encodeur.encode("oublie-mdp-1"), "P1");
+        when(repository.findById(4L)).thenReturn(Optional.of(c));
+
+        String temporaire = service.reinitialiserMotDePasse(4L, 1L);
+
+        assertEquals(12, temporaire.length());
+        assertTrue(encodeur.matches(temporaire, c.getMotDePasseHache()), "le nouveau hash correspond au mot de passe rendu");
+        assertFalse(encodeur.matches("oublie-mdp-1", c.getMotDePasseHache()), "l'ancien mot de passe ne marche plus");
+    }
+
+    @Test
+    void reinitialiserDonneDesMotsDePasseDifferents() {
+        Chauffeur c = new Chauffeur("N", "P", "c@tulear.mg", "h", "P1");
+        when(repository.findById(4L)).thenReturn(Optional.of(c));
+        assertNotEquals(service.reinitialiserMotDePasse(4L, 1L), service.reinitialiserMotDePasse(4L, 1L));
+    }
+
+    @Test
+    void unAdministrateurNeReinitialisePasSonPropreMotDePasse() {
+        assertThrows(RegleMetierException.class, () -> service.reinitialiserMotDePasse(1L, 1L));
+        verifyNoInteractions(repository);
+    }
+
+    @Test
+    void reinitialiserUnCompteInconnuRenvoieIntrouvable() {
+        when(repository.findById(99L)).thenReturn(Optional.empty());
+        assertThrows(RessourceIntrouvableException.class, () -> service.reinitialiserMotDePasse(99L, 1L));
+    }
+
+    @Test
+    void reinitialisationDeSecoursParEmailIgnoreLaCasse() {
+        Administrateur a = new Administrateur("N", "P", "admin@tulear.mg", encodeur.encode("oublie-mdp-1"));
+        when(repository.findByEmailIgnoreCase("admin@tulear.mg")).thenReturn(Optional.of(a));
+
+        service.reinitialiserParEmail("  Admin@Tulear.MG ", "nouveau-mdp-2");
+
+        assertTrue(encodeur.matches("nouveau-mdp-2", a.getMotDePasseHache()));
+    }
+
+    @Test
+    void reinitialisationDeSecoursAvecEmailInconnuEchoue() {
+        when(repository.findByEmailIgnoreCase(any())).thenReturn(Optional.empty());
+        assertThrows(RessourceIntrouvableException.class, () -> service.reinitialiserParEmail("x@tulear.mg", "nouveau-mdp-2"));
     }
 }

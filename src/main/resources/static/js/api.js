@@ -44,6 +44,7 @@ export const api = {
   creerUtilisateur: (corps) => requete('/api/utilisateurs', { method: 'POST', corps }),
   activer: (id) => post(`/api/utilisateurs/${id}/activer`),
   desactiver: (id) => post(`/api/utilisateurs/${id}/desactiver`),
+  reinitialiserMotDePasse: (id) => post(`/api/utilisateurs/${id}/reinitialiser-mot-de-passe`),
   configuration: () => requete('/api/configuration'),
   statistiques: () => requete('/api/statistiques'),
   zones: () => requete('/api/zones'),

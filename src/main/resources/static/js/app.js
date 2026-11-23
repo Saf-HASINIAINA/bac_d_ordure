@@ -42,12 +42,12 @@ function changement(cle, donnees) {
 }
 
 let minuteurMessage;
-function afficherMessage(texte, type) {
+function afficherMessage(texte, type, dureeMs = 7000) {
   const zone = $('message');
   zone.textContent = texte;
   zone.className = `message ${type}`;
   clearTimeout(minuteurMessage);
-  if (texte) minuteurMessage = setTimeout(() => afficherMessage('', ''), 7000);
+  if (texte) minuteurMessage = setTimeout(() => afficherMessage('', ''), dureeMs);
 }
 
 function marquerConnexion(enLigne) {
@@ -297,13 +297,33 @@ function afficherUtilisateurs(liste) {
     } else if (u.id !== etat.moi.id) {
       action = boutonAction('Désactiver', () => api.desactiver(u.id), `Compte de ${nomComplet} désactivé.`, 'danger');
     }
+    const reinit = u.id !== etat.moi.id ? boutonReinitialisation(u, nomComplet) : null;
     return h('tr', {},
       h('td', {}, nomComplet),
       h('td', {}, u.email),
       h('td', {}, LIBELLES_ROLE[u.role] ?? u.role),
       h('td', {}, h('span', { class: `badge ${u.actif ? 'TERMINEE' : 'PLANIFIEE'}` }, u.actif ? 'Actif' : 'Inactif')),
-      h('td', {}, action));
+      h('td', { class: 'actions-ligne' }, action, reinit));
   }));
+}
+
+/** Mot de passe oublié : génère un mot de passe temporaire, affiché une seule fois à l'administrateur. */
+function boutonReinitialisation(u, nomComplet) {
+  const bouton = h('button', { class: 'bouton', type: 'button' }, 'Réinitialiser le mot de passe');
+  bouton.addEventListener('click', async () => {
+    if (!confirm(`Réinitialiser le mot de passe de ${nomComplet} ?\nL'ancien mot de passe ne fonctionnera plus.`)) return;
+    bouton.disabled = true;
+    try {
+      const { motDePasse } = await api.reinitialiserMotDePasse(u.id);
+      afficherMessage(`Mot de passe temporaire de ${nomComplet} : ${motDePasse} — à lui communiquer maintenant, il ne sera plus affiché. `
+        + 'Il pourra le changer avec le bouton « Mot de passe ».', 'succes', 60000);
+    } catch (e) {
+      afficherMessage(e.message, 'erreur');
+    } finally {
+      bouton.disabled = false;
+    }
+  });
+  return bouton;
 }
 
 function brancherFormulaireUtilisateur() {
