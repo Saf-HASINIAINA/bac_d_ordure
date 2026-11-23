@@ -1,0 +1,13 @@
+# Rien de secret ni d'inutile dans l'image
+.git
+.github
+.env
+.env.*
+!.env.example
+target
+docs
+supabase/.temp
+supabase/.branches
+.idea
+.vscode
+*.md

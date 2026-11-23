@@ -6,3 +6,4 @@ target/
 .idea/
 .vscode/
 !.env.example
+!.env.docker.example

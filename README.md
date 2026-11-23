@@ -11,6 +11,8 @@ Projet de fin d'année M1 — ENI Fianarantsoa. Java 17 / Spring Boot / PostgreS
    (le mot de passe des comptes de démo est affiché dans les logs, ou fixé par `DEMO_PASSWORD`).
 3. Ensuite : `mvn spring-boot:run`
 
+Avec Docker (base et application en une commande) : voir `docs/07_deploiement.md`.
+
 Réglages de la simulation dans `src/main/resources/application.properties` (`simulation.*`) :
 intervalle des mesures (30 s par défaut, `--simulation.intervalle-ms=5000` pour une démo), accélération du temps,
 taux de perte des messages et durée de conservation des mesures (2 jours, purge automatique).
