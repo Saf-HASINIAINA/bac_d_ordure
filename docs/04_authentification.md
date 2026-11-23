@@ -55,7 +55,15 @@ la matrice soit mise à jour.
 | POST | `/api/utilisateurs/{id}/desactiver` | administrateur (pas son propre compte) |
 
 Codes d'erreur : 401 non connecté ou identifiants invalides, 403 droits insuffisants ou jeton CSRF absent,
-409 email déjà utilisé, 400 données invalides.
+409 email déjà utilisé, 400 données invalides, 429 trop de tentatives de connexion.
+
+## Limitation des essais de connexion
+Après **5 échecs** consécutifs pour une même adresse e-mail, toute connexion à cette adresse est refusée pendant
+**15 minutes**, même avec le bon mot de passe : réponse `429` avec l'en-tête `Retry-After` et un message en français.
+Un succès remet le compteur à zéro. Les adresses inconnues sont comptées comme les autres, afin de ne pas révéler
+quels comptes existent. Un compte inactif (bon mot de passe mais en attente de validation) n'est pas compté.
+Réglages : `app.securite.max-echecs` et `app.securite.duree-blocage-minutes` (`application.properties`).
+Classes : `LimiteurConnexions`, `FiltreLimitationConnexions`, branchées dans `SecurityConfig`.
 
 ## Comptes de démonstration
 Créés avec `--app.init-demo=true` : `admin@tulear.mg`, `superviseur@tulear.mg`, `chauffeur@tulear.mg`
@@ -68,7 +76,7 @@ mvn spring-boot:run -Dspring-boot.run.arguments="--app.init-demo=true --app.rese
 (ajouter `--app.demo-password=...` pour choisir la valeur, sinon elle est générée et affichée).
 
 ## Limites connues
-- Pas de limitation du nombre d'essais de connexion (à ajouter avant une mise en ligne).
+- Limitation des essais en mémoire, par adresse e-mail (pas par adresse IP) : un attaquant peut donc bloquer 15 minutes un compte connu, et le compteur repart à zéro au redémarrage. Suffisant pour une seule instance.
 - Pas de réinitialisation du mot de passe par e-mail (le changement de mot de passe existe, avec l'ancien mot de passe).
 - Derrière HTTPS, activer `server.servlet.session.cookie.secure=true`.
 - Un message distinct indique qu'un compte existe mais est inactif ; l'email d'un compte existant est aussi révélé à l'inscription.

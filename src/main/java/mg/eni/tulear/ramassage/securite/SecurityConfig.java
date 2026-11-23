@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.http.HttpServletResponse;
 import mg.eni.tulear.ramassage.api.dto.ErreurApi;
 import mg.eni.tulear.ramassage.api.dto.MessageDto;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
@@ -17,11 +18,14 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.HttpStatusEntryPoint;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.security.web.authentication.LoginUrlAuthenticationEntryPoint;
 import org.springframework.security.web.csrf.CookieCsrfTokenRepository;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
+import java.time.Clock;
+import java.time.Duration;
 
 /**
  * Sécurité de l'application : connexion par session (cookie), protection CSRF, droits par rôle.
@@ -36,9 +40,19 @@ public class SecurityConfig {
         return new BCryptPasswordEncoder();
     }
 
+    /** Essais de connexion : {@code app.securite.max-echecs} échecs, puis blocage de {@code app.securite.duree-blocage-minutes}. */
     @Bean
-    public SecurityFilterChain chaineDeSecurite(HttpSecurity http, ObjectMapper mapper) throws Exception {
+    public LimiteurConnexions limiteurConnexions(
+            @Value("${app.securite.max-echecs:5}") int maxEchecs,
+            @Value("${app.securite.duree-blocage-minutes:15}") long dureeBlocageMinutes) {
+        return new LimiteurConnexions(maxEchecs, Duration.ofMinutes(dureeBlocageMinutes), Clock.systemUTC());
+    }
+
+    @Bean
+    public SecurityFilterChain chaineDeSecurite(HttpSecurity http, ObjectMapper mapper,
+                                                LimiteurConnexions limiteur) throws Exception {
         http
+            .addFilterBefore(new FiltreLimitationConnexions(limiteur, mapper), UsernamePasswordAuthenticationFilter.class)
             .authorizeHttpRequests(a -> a
                 .requestMatchers("/login.html", "/inscription.html", "/mot-de-passe-oublie.html", "/css/**", "/js/**", "/vendor/**",
                         "/favicon.ico", "/error").permitAll()
@@ -75,9 +89,15 @@ public class SecurityConfig {
                 .loginProcessingUrl("/api/auth/connexion")
                 .usernameParameter("email")
                 .passwordParameter("motDePasse")
-                .successHandler((req, res, auth) -> ecrire(res, mapper, 200, new MessageDto("Connecté")))
-                .failureHandler((req, res, ex) ->
-                        ecrire(res, mapper, 401, ErreurApi.de(401, messageEchec(ex))))
+                .successHandler((req, res, auth) -> {
+                    limiteur.enregistrerSucces(req.getParameter("email"));
+                    ecrire(res, mapper, 200, new MessageDto("Connecté"));
+                })
+                .failureHandler((req, res, ex) -> {
+                    // un compte inactif a fourni le bon mot de passe : ce n'est pas du devinage
+                    if (!(ex instanceof DisabledException)) limiteur.enregistrerEchec(req.getParameter("email"));
+                    ecrire(res, mapper, 401, ErreurApi.de(401, messageEchec(ex)));
+                })
                 .permitAll())
             .logout(l -> l
                 .logoutUrl("/api/auth/deconnexion")

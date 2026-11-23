@@ -56,6 +56,6 @@ Chaque règle a été vérifiée en plus par des essais réels sur un PostgreSQL
 ## Limites connues
 - Distances à vol d'oiseau (pas de routage routier) ; position du camion mise à jour à chaque vidange.
 - Poids collecté estimé à partir du niveau (densité 0,15 kg/L) ; matériel simulé.
-- Pas de limitation des essais de connexion, de réinitialisation du mot de passe par e-mail, ni de HTTPS intégré.
+- Pas de réinitialisation du mot de passe par e-mail ni de HTTPS intégré ; limitation des essais de connexion en mémoire, par e-mail.
 - Mise à jour du tableau de bord par interrogation toutes les 5 secondes (pas de WebSocket).
 - Pas de test automatisé du navigateur : l'interface a été vérifiée par captures et scripts Chrome en mode headless.
