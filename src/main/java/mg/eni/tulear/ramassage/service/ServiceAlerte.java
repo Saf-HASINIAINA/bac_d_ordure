@@ -59,6 +59,13 @@ public class ServiceAlerte {
         }
     }
 
+    /** Incident signalé par un chauffeur : chaque signalement crée une alerte (pas de dédoublonnage). */
+    public Alerte signalerIncident(Bac bac, String message) {
+        Alerte alerte = alerteRepository.save(new Alerte(TypeAlerte.INCIDENT_CHAUFFEUR, message, bac));
+        observateurs.forEach(o -> o.notifier(alerte));
+        return alerte;
+    }
+
     /** RG6 : un capteur n'a plus envoyé de mesure depuis trop longtemps. */
     public void signalerCapteurEnPanne(Bac bac, TypeCapteur type, long minutesSansMesure) {
         creerSiAbsente(TypeAlerte.CAPTEUR_PANNE, bac,

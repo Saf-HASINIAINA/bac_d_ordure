@@ -1,10 +1,8 @@
 package mg.eni.tulear.ramassage.api;
 
-import mg.eni.tulear.ramassage.api.dto.CamionDto;
 import mg.eni.tulear.ramassage.api.dto.ChauffeurDto;
 import mg.eni.tulear.ramassage.api.dto.ConfigurationDto;
 import mg.eni.tulear.ramassage.api.dto.StatistiquesDto;
-import mg.eni.tulear.ramassage.api.dto.ZoneDto;
 import mg.eni.tulear.ramassage.service.ConsultationService;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -27,16 +25,6 @@ public class ReferentielController {
         this.consultation = consultation;
         this.depotLatitude = depotLatitude;
         this.depotLongitude = depotLongitude;
-    }
-
-    @GetMapping("/zones")
-    public List<ZoneDto> zones() {
-        return consultation.zones();
-    }
-
-    @GetMapping("/camions")
-    public List<CamionDto> camions() {
-        return consultation.camions();
     }
 
     @GetMapping("/chauffeurs")

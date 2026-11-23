@@ -45,6 +45,7 @@ class SecuriteApiTest {
     @MockBean TourneeFacade tournees;
     @MockBean AlerteService alerteService;
     @MockBean UtilisateurService utilisateurService;
+    @MockBean ParcService parcService;
     @MockBean UserDetailsService userDetailsService;
 
     private static RequestPostProcessor connecte(Role role, long id) {

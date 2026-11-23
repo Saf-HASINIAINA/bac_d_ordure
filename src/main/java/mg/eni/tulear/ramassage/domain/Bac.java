@@ -87,6 +87,25 @@ public class Bac {
 
     public Position getPosition() { return new Position(latitude, longitude); }
 
+    /** Modification par l'administrateur : le code du bac ne change jamais (traçabilité). */
+    public void modifier(Zone zone, double latitude, double longitude, double capaciteLitres, TypeDechet typeDechet) {
+        this.zone = zone;
+        this.latitude = latitude;
+        this.longitude = longitude;
+        this.capaciteLitres = capaciteLitres;
+        this.typeDechet = typeDechet;
+    }
+
+    /** Maintenance : le bac n'est plus proposé dans les tournées. */
+    public void mettreHorsService() {
+        this.etat = EtatBac.HORS_SERVICE;
+    }
+
+    /** Fin de maintenance : l'état est recalculé d'après le niveau (RG1). */
+    public void remettreEnService(Seuils seuils) {
+        this.etat = seuils.etatPour(niveauPourcent);
+    }
+
     public void setEtat(EtatBac etat) { this.etat = etat; }
 
     public Long getId() { return id; }

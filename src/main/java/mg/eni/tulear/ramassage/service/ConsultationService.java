@@ -53,7 +53,9 @@ public class ConsultationService {
     }
 
     public List<ZoneDto> zones() {
-        return zoneRepository.findAll().stream().map(ZoneDto::from).toList();
+        return zoneRepository.findAll().stream()
+                .map(z -> ZoneDto.from(z, bacRepository.countByZoneId(z.getId())))
+                .toList();
     }
 
     public List<CamionDto> camions() {

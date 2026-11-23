@@ -23,4 +23,5 @@ public interface CollecteRepository extends JpaRepository<Collecte, Long> {
 
     @Query("select coalesce(sum(c.poidsCollecteKg), 0) from Collecte c where c.effectuee = true")
     double tonnageCollecteKg();
+    boolean existsByBacId(Long bacId);
 }

@@ -106,30 +106,31 @@ class UtilisateurServiceTest {
     }
 
     @Test
-    void changerMotDePasseEnregistreLeNouveauHache() {
-        Chauffeur c = new Chauffeur("N", "P", "c@tulear.mg", encodeur.encode("ancienmdp1"), "P1");
-        when(repository.findById(4L)).thenReturn(Optional.of(c));
+    void changerSonMotDePasseExigeLAncienEtLeHacheLeNouveau() {
+        Chauffeur c = new Chauffeur("N", "P", "c@tulear.mg", encodeur.encode("ancien-mdp-1"), "P1");
+        when(repository.findById(3L)).thenReturn(Optional.of(c));
 
-        service.changerMotDePasse(4L, "ancienmdp1", "nouveaumdp1");
+        service.changerMotDePasse(3L, "ancien-mdp-1", "nouveau-mdp-2");
 
-        assertTrue(encodeur.matches("nouveaumdp1", c.getMotDePasseHache()));
-        assertFalse(encodeur.matches("ancienmdp1", c.getMotDePasseHache()));
+        assertTrue(encodeur.matches("nouveau-mdp-2", c.getMotDePasseHache()));
+        assertFalse(encodeur.matches("ancien-mdp-1", c.getMotDePasseHache()));
+        assertNotEquals("nouveau-mdp-2", c.getMotDePasseHache());
     }
 
     @Test
-    void changerMotDePasseRefuseUnAncienMotDePasseIncorrect() {
-        String hash = encodeur.encode("ancienmdp1");
-        Chauffeur c = new Chauffeur("N", "P", "c@tulear.mg", hash, "P1");
-        when(repository.findById(4L)).thenReturn(Optional.of(c));
+    void unMauvaisAncienMotDePasseEstRefuseEtRienNeChange() {
+        String hache = encodeur.encode("ancien-mdp-1");
+        Chauffeur c = new Chauffeur("N", "P", "c@tulear.mg", hache, "P1");
+        when(repository.findById(3L)).thenReturn(Optional.of(c));
 
-        assertThrows(RegleMetierException.class, () -> service.changerMotDePasse(4L, "faux-mdp-1", "nouveaumdp1"));
-        assertEquals(hash, c.getMotDePasseHache(), "le mot de passe ne doit pas changer");
+        assertThrows(RequeteInvalideException.class, () -> service.changerMotDePasse(3L, "pas-le-bon", "nouveau-mdp-2"));
+        assertEquals(hache, c.getMotDePasseHache());
     }
 
     @Test
-    void changerMotDePasseRefuseLeMemeMotDePasse() {
-        Chauffeur c = new Chauffeur("N", "P", "c@tulear.mg", encodeur.encode("ancienmdp1"), "P1");
-        when(repository.findById(4L)).thenReturn(Optional.of(c));
-        assertThrows(RegleMetierException.class, () -> service.changerMotDePasse(4L, "ancienmdp1", "ancienmdp1"));
+    void leNouveauMotDePasseDoitDifferer() {
+        Chauffeur c = new Chauffeur("N", "P", "c@tulear.mg", encodeur.encode("ancien-mdp-1"), "P1");
+        when(repository.findById(3L)).thenReturn(Optional.of(c));
+        assertThrows(RequeteInvalideException.class, () -> service.changerMotDePasse(3L, "ancien-mdp-1", "ancien-mdp-1"));
     }
 }

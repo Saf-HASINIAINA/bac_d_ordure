@@ -203,3 +203,5 @@ td.vide { text-align: center; padding: 1rem; }
 @media (max-width: 1000px) {
   .rapport-grille { grid-template-columns: 1fr; }
 }
+
+.grille.une-colonne { grid-template-columns: 1fr; }

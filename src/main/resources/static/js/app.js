@@ -271,7 +271,13 @@ function afficherUtilisateurConnecte() {
   $('bloc-planification').hidden = !peutGerer();
   $('bloc-rapport').hidden = !peutGerer();
   $('bloc-utilisateurs').hidden = !estAdmin();
-  if (!peutGerer()) $('titre-tournees').textContent = 'Mes tournées';
+  if (!peutGerer()) {
+    // le chauffeur n'a accès ni aux indicateurs ni aux alertes (droits serveur) : on lui montre la carte et ses tournées
+    $('titre-tournees').textContent = 'Mes tournées';
+    $('bloc-kpis').hidden = true;
+    $('colonne-alertes').hidden = true;
+    $('grille-carte').classList.add('une-colonne');
+  }
 }
 
 /* ---------- gestion des comptes (administrateur) ---------- */
@@ -332,13 +338,14 @@ async function rafraichir(force = false) {
   etat.enCours = true;
   try {
     const [stats, bacs, alertes, camions, tournees, utilisateurs] = await Promise.all([
-      api.statistiques(), api.bacs(), api.alertes(false), api.camions(), api.tournees(),
+      peutGerer() ? api.statistiques() : Promise.resolve(null), api.bacs(),
+      peutGerer() ? api.alertes(false) : Promise.resolve(null), api.camions(), api.tournees(),
       estAdmin() ? api.utilisateurs() : Promise.resolve(null),
     ]);
-    afficherStatistiques(stats);
+    if (stats) afficherStatistiques(stats);
     etat.carte.majBacs(bacs);
     etat.carte.majCamions(camions);
-    afficherAlertes(alertes);
+    if (alertes) afficherAlertes(alertes);
     if (peutGerer()) afficherCamionsDisponibles(camions);
     if (utilisateurs) afficherUtilisateurs(utilisateurs);
     afficherTournees(tournees);
@@ -364,7 +371,7 @@ async function demarrer() {
   }
   afficherUtilisateurConnecte();
   creerLegende();
-  creerGraphique();
+  if (peutGerer()) creerGraphique();
   brancherFormulaire();
   if (peutGerer()) initialiserRapport(afficherMessage);
   if (estAdmin()) brancherFormulaireUtilisateur();

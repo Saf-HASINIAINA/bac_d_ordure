@@ -30,8 +30,8 @@ public class AuthController {
     }
 
     @PostMapping("/mot-de-passe")
-    public MessageDto changerMotDePasse(@AuthenticationPrincipal UtilisateurDetails moi,
-                                        @Valid @RequestBody ChangerMotDePasseRequest requete) {
+    public MessageDto changerMotDePasse(@Valid @RequestBody ChangerMotDePasseRequest requete,
+                                        @AuthenticationPrincipal UtilisateurDetails moi) {
         utilisateurService.changerMotDePasse(moi.getId(), requete.ancienMotDePasse(), requete.nouveauMotDePasse());
         return new MessageDto("Mot de passe modifié.");
     }

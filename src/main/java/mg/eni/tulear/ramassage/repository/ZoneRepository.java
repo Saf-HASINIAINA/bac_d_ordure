@@ -6,4 +6,5 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import java.util.List;
 
 public interface ZoneRepository extends JpaRepository<Zone, Long> {
+    java.util.Optional<Zone> findByNomIgnoreCase(String nom);
 }

@@ -41,6 +41,7 @@ class ApiControllersTest {
     @MockBean ConsultationService consultation;
     @MockBean TourneeFacade tournees;
     @MockBean AlerteService alerteService;
+    @MockBean ParcService parcService;
     @MockBean UserDetailsService userDetailsService;
 
     /** Un superviseur connecté : il a le droit de tout faire sur ces ressources. */

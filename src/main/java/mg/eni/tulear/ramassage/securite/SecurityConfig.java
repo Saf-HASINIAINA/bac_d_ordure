@@ -43,11 +43,21 @@ public class SecurityConfig {
                 .requestMatchers("/login.html", "/inscription.html", "/css/**", "/js/**", "/vendor/**",
                         "/favicon.ico", "/error").permitAll()
                 .requestMatchers(HttpMethod.POST, "/api/auth/inscription").permitAll()
+                // ----- administrateur seul -----
                 .requestMatchers("/api/utilisateurs/**").hasRole("ADMIN")
+                .requestMatchers(HttpMethod.POST, "/api/bacs", "/api/zones", "/api/camions").hasRole("ADMIN")
+                .requestMatchers(HttpMethod.PUT, "/api/bacs/*", "/api/zones/*", "/api/camions/*").hasRole("ADMIN")
+                .requestMatchers(HttpMethod.DELETE, "/api/bacs/*", "/api/zones/*", "/api/camions/*").hasRole("ADMIN")
+                // ----- administrateur et superviseur -----
                 .requestMatchers("/api/rapports/**").hasAnyRole("ADMIN", "SUPERVISEUR")
+                .requestMatchers(HttpMethod.GET, "/api/alertes/**", "/api/statistiques", "/api/zones/**", "/api/chauffeurs")
+                        .hasAnyRole("ADMIN", "SUPERVISEUR")
+                .requestMatchers(HttpMethod.POST, "/api/bacs/*/hors-service", "/api/bacs/*/remise-en-service",
+                        "/api/camions/*/panne", "/api/camions/*/disponible").hasAnyRole("ADMIN", "SUPERVISEUR")
                 .requestMatchers(HttpMethod.POST, "/api/tournees", "/api/tournees/*/annuler", "/api/alertes/*/traiter")
                         .hasAnyRole("ADMIN", "SUPERVISEUR")
-                // lecture pour tout utilisateur connecté ; démarrer / vidanger / terminer : propriétaire vérifié dans TourneeFacade
+                // tout utilisateur connecté : carte (bacs, camions), ses tournées, incident, mot de passe.
+                // Démarrer / vidanger / terminer / incident : propriétaire vérifié dans TourneeFacade.
                 .anyRequest().authenticated())
             .csrf(c -> c
                 .csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse())

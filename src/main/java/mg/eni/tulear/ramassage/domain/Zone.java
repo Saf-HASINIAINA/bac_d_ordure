@@ -31,6 +31,13 @@ public class Zone {
         this.longitudeCentre = longitudeCentre;
     }
 
+    public void modifier(String nom, int frequenceCollecteHeures, Double latitudeCentre, Double longitudeCentre) {
+        this.nom = nom;
+        this.frequenceCollecteHeures = frequenceCollecteHeures;
+        this.latitudeCentre = latitudeCentre;
+        this.longitudeCentre = longitudeCentre;
+    }
+
     public Long getId() { return id; }
     public String getNom() { return nom; }
     public int getFrequenceCollecteHeures() { return frequenceCollecteHeures; }
