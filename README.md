@@ -1,5 +1,7 @@
 # Ramassage automatique de bacs — Commune Urbaine de Tuléar
 
+![Tests](https://github.com/Saf-HASINIAINA/bac_d_ordure/actions/workflows/tests.yml/badge.svg)
+
 Projet de fin d'année M1 — ENI Fianarantsoa. Java 17 / Spring Boot / PostgreSQL (Supabase), matériel simulé.
 
 ## Lancer l'application
