@@ -40,3 +40,5 @@ ne voit rien, seul le backend (connexion JDBC) accède aux données.
 `zone`, `utilisateur`, `camion`, `bac`, `capteur`, `mesure`, `tournee`, `collecte`, `alerte`, `parametre`, `journal_audit`
 
 `journal_audit` (migration `20261123100000_journal_audit.sql`) : date, utilisateur (sans clé étrangère, pour que l'historique survive à un compte supprimé), e-mail, action, méthode, chemin, statut, adresse IP. **Après une mise à jour du code, appliquer cette migration (`npx supabase db push`) avant de relancer l'application** : Hibernate est en mode `validate` et refuse de démarrer si la table manque.
+
+**Automatique au lancement** : `./lancer.sh` exécute `npx supabase db push --remote` (mot de passe pris dans `DB_PASSWORD` du `.env`) avant de démarrer l'application. Les migrations déjà appliquées sont ignorées ; seul un nouveau fichier est exécuté.

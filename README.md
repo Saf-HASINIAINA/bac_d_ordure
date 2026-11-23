@@ -9,7 +9,9 @@ Projet de fin d'année M1 — ENI Fianarantsoa. Java 17 / Spring Boot / PostgreS
 2. Première fois seulement, pour créer zones, camions, bacs, capteurs et comptes de démo :
    `mvn spring-boot:run -Dspring-boot.run.arguments=--app.init-demo=true`
    (le mot de passe des comptes de démo est affiché dans les logs, ou fixé par `DEMO_PASSWORD`).
-3. Ensuite : `mvn spring-boot:run`
+3. Ensuite : `./lancer.sh` — applique d'abord les migrations Supabase (`npx supabase db push --remote`), puis démarre
+   l'application. Arguments Spring acceptés : `./lancer.sh --app.init-demo=true`. `SANS_MIGRATION=1 ./lancer.sh` saute la migration.
+   Prérequis une seule fois : `npx supabase link --project-ref <REF>`. (`mvn spring-boot:run` seul reste possible, sans migration.)
 
 Avec Docker (base et application en une commande) : voir `docs/07_deploiement.md`.
 
