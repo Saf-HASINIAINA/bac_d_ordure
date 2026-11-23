@@ -36,7 +36,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
  */
 @WebMvcTest(controllers = {BacController.class, ZoneController.class, CamionController.class, TourneeController.class,
         AlerteController.class, ReferentielController.class, AuthController.class, UtilisateurController.class,
-        RapportController.class})
+        RapportController.class, AuditController.class})
 @Import(SecurityConfig.class)
 class DroitsParRoleTest {
 
@@ -96,6 +96,7 @@ class DroitsParRoleTest {
             new Route(HttpMethod.PUT, "/api/camions/1", CAMION, ADMIN),
             new Route(HttpMethod.DELETE, "/api/camions/1", null, ADMIN),
             new Route(HttpMethod.GET, "/api/utilisateurs", null, ADMIN),
+            new Route(HttpMethod.GET, "/api/audit", null, ADMIN),
             new Route(HttpMethod.POST, "/api/utilisateurs", COMPTE, ADMIN),
             new Route(HttpMethod.POST, "/api/utilisateurs/1/activer", null, ADMIN),
             new Route(HttpMethod.POST, "/api/utilisateurs/1/desactiver", null, ADMIN),
@@ -108,6 +109,7 @@ class DroitsParRoleTest {
     @MockBean UtilisateurService utilisateurService;
     @MockBean ParcService parc;
     @MockBean RapportService rapportService;
+    @MockBean JournalAuditService journalAudit;
     @MockBean UserDetailsService userDetailsService;
 
     @org.junit.jupiter.api.BeforeEach

@@ -2,6 +2,7 @@ import { api } from './api.js';
 import { Carte, COULEURS, LIBELLES_ETAT } from './carte.js';
 import { h, remplacer, entier, depuis } from './dom.js';
 import { initialiserRapport } from './rapport.js';
+import { initialiserAudit } from './audit.js';
 
 const INTERVALLE_MS = 5000;
 const NB_TOURNEES_AFFICHEES = 6;
@@ -271,6 +272,7 @@ function afficherUtilisateurConnecte() {
   $('bloc-planification').hidden = !peutGerer();
   $('bloc-rapport').hidden = !peutGerer();
   $('bloc-utilisateurs').hidden = !estAdmin();
+  $('bloc-audit').hidden = !estAdmin();
   if (!peutGerer()) {
     // le chauffeur n'a accès ni aux indicateurs ni aux alertes (droits serveur) : on lui montre la carte et ses tournées
     $('titre-tournees').textContent = 'Mes tournées';
@@ -303,7 +305,7 @@ function afficherUtilisateurs(liste) {
       h('td', {}, u.email),
       h('td', {}, LIBELLES_ROLE[u.role] ?? u.role),
       h('td', {}, h('span', { class: `badge ${u.actif ? 'TERMINEE' : 'PLANIFIEE'}` }, u.actif ? 'Actif' : 'Inactif')),
-      h('td', { class: 'actions-ligne' }, action, reinit));
+      h('td', {}, h('div', { class: 'actions-ligne' }, action, reinit)));
   }));
 }
 
@@ -394,7 +396,10 @@ async function demarrer() {
   if (peutGerer()) creerGraphique();
   brancherFormulaire();
   if (peutGerer()) initialiserRapport(afficherMessage);
-  if (estAdmin()) brancherFormulaireUtilisateur();
+  if (estAdmin()) {
+    brancherFormulaireUtilisateur();
+    initialiserAudit(afficherMessage);
+  }
   try {
     const [configuration, zones, chauffeurs] = await Promise.all([
       api.configuration(),

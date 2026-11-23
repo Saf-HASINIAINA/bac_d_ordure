@@ -35,6 +35,7 @@ le **chauffeur** exécute ses tournées.
 | Créer, modifier, supprimer un camion | oui | non | non |
 | Rapports et export CSV | oui | oui | non |
 | Gérer les comptes (lister, créer, activer, désactiver, réinitialiser un mot de passe) | oui | non | non |
+| Consulter le journal d'audit | oui | non | non |
 | Changer son propre mot de passe | oui | oui | oui |
 
 Les droits sont appliqués **côté serveur** (`SecurityConfig` et `TourneeFacade`) ; masquer un bouton dans la page n'est qu'un confort.
@@ -49,6 +50,7 @@ la matrice soit mise à jour.
 | POST | `/api/auth/inscription` | public |
 | GET | `/api/auth/moi` | connecté : identité et rôle |
 | POST | `/api/auth/mot-de-passe` | connecté : changer son mot de passe |
+| GET | `/api/audit?page=0&taille=50` | administrateur : journal d'audit paginé (taille max 200), du plus récent au plus ancien |
 | GET | `/api/utilisateurs` | administrateur |
 | POST | `/api/utilisateurs` | administrateur : `{role, nom, prenom, email, motDePasse, numeroPermis}` (permis obligatoire pour un chauffeur) |
 | POST | `/api/utilisateurs/{id}/activer` | administrateur |
@@ -57,6 +59,17 @@ la matrice soit mise à jour.
 
 Codes d'erreur : 401 non connecté ou identifiants invalides, 403 droits insuffisants ou jeton CSRF absent,
 409 email déjà utilisé, 400 données invalides, 429 trop de tentatives de connexion.
+
+## Journal d'audit
+Chaque **modification réussie** de l'API (POST, PUT, DELETE : création, tournée, vidange, suppression…), chaque
+**connexion**, **échec de connexion** et **déconnexion** est inscrit dans la table `journal_audit` : date, utilisateur
+(identifiant et e-mail), action en français, méthode, chemin, statut et adresse IP. L'administrateur le consulte dans la
+section « Journal d'audit » du tableau de bord (25 lignes à la fois, « Voir les actions plus anciennes »).
+- Le **corps des requêtes n'est jamais lu** : aucun mot de passe (saisi ou temporaire) ne peut s'y retrouver.
+- Les consultations (GET), les actions refusées (403) et les erreurs (404, 409…) ne sont pas journalisées ; les échecs de connexion le sont.
+- Une panne du journal **ne fait jamais échouer** l'action de l'utilisateur (erreur écrite dans les logs).
+- Une nouvelle route non listée dans `LibellesAudit` est journalisée avec sa méthode et son modèle (`POST /api/xxx/{id}`).
+- Classes : `JournalAuditInterceptor` (modifications), `SecurityConfig` (connexions), `JournalAuditService`, `AuditController`.
 
 ## Limitation des essais de connexion
 Après **5 échecs** consécutifs pour une même adresse e-mail, toute connexion à cette adresse est refusée pendant
@@ -88,6 +101,7 @@ mvn spring-boot:run -Dspring-boot.run.arguments="--app.init-demo=true --app.rese
   L'application s'arrête ensuite. Cette commande exige l'accès au serveur et à `.env`.
 
 ## Limites connues
+- Le journal d'audit n'est pas inviolable (un administrateur de la base peut le modifier) et n'est pas purgé automatiquement.
 - Limitation des essais en mémoire, par adresse e-mail (pas par adresse IP) : un attaquant peut donc bloquer 15 minutes un compte connu, et le compteur repart à zéro au redémarrage. Suffisant pour une seule instance.
 - Pas de réinitialisation du mot de passe par e-mail (réinitialisation par un administrateur ou commande de secours). Le mot de passe temporaire n'est pas à changer obligatoirement à la première connexion.
 - Derrière HTTPS, activer `server.servlet.session.cookie.secure=true`.

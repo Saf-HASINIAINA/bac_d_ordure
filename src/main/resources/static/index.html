@@ -125,6 +125,22 @@
         </form>
       </details>
     </section>
+
+    <section class="bloc" id="bloc-audit" hidden>
+      <h2>Journal d'audit</h2>
+      <p class="aide">Qui a fait quoi : connexions, créations, modifications et suppressions réussies. Les mots de passe n'y figurent jamais.</p>
+      <div class="defilement">
+        <table class="tableau">
+          <thead><tr><th>Date</th><th>Utilisateur</th><th>Action</th><th>Résultat</th><th>Adresse IP</th></tr></thead>
+          <tbody id="audit"></tbody>
+        </table>
+      </div>
+      <div class="actions-ligne barre-audit">
+        <button type="button" class="bouton" id="audit-actualiser">Actualiser</button>
+        <button type="button" class="bouton" id="audit-plus" hidden>Voir les actions plus anciennes</button>
+        <span class="aide" id="audit-total"></span>
+      </div>
+    </section>
   </main>
 
   <script src="vendor/leaflet/leaflet.js"></script>

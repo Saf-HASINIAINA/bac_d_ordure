@@ -45,6 +45,7 @@ export const api = {
   activer: (id) => post(`/api/utilisateurs/${id}/activer`),
   desactiver: (id) => post(`/api/utilisateurs/${id}/desactiver`),
   reinitialiserMotDePasse: (id) => post(`/api/utilisateurs/${id}/reinitialiser-mot-de-passe`),
+  audit: (page, taille) => requete(`/api/audit?page=${page}&taille=${taille}`),
   configuration: () => requete('/api/configuration'),
   statistiques: () => requete('/api/statistiques'),
   zones: () => requete('/api/zones'),

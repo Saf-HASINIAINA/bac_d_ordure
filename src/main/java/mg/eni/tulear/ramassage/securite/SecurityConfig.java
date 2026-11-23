@@ -1,9 +1,12 @@
 package mg.eni.tulear.ramassage.securite;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import mg.eni.tulear.ramassage.api.dto.ErreurApi;
 import mg.eni.tulear.ramassage.api.dto.MessageDto;
+import mg.eni.tulear.ramassage.service.JournalAuditService;
+import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -13,6 +16,7 @@ import org.springframework.http.MediaType;
 import org.springframework.security.authentication.DisabledException;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -50,7 +54,8 @@ public class SecurityConfig {
 
     @Bean
     public SecurityFilterChain chaineDeSecurite(HttpSecurity http, ObjectMapper mapper,
-                                                LimiteurConnexions limiteur) throws Exception {
+                                                LimiteurConnexions limiteur,
+                                                ObjectProvider<JournalAuditService> audit) throws Exception {
         http
             .addFilterBefore(new FiltreLimitationConnexions(limiteur, mapper), UsernamePasswordAuthenticationFilter.class)
             .authorizeHttpRequests(a -> a
@@ -58,7 +63,7 @@ public class SecurityConfig {
                         "/favicon.ico", "/error").permitAll()
                 .requestMatchers(HttpMethod.POST, "/api/auth/inscription").permitAll()
                 // ----- administrateur seul -----
-                .requestMatchers("/api/utilisateurs/**").hasRole("ADMIN")
+                .requestMatchers("/api/utilisateurs/**", "/api/audit/**").hasRole("ADMIN")
                 .requestMatchers(HttpMethod.POST, "/api/bacs", "/api/zones", "/api/camions").hasRole("ADMIN")
                 .requestMatchers(HttpMethod.PUT, "/api/bacs/*", "/api/zones/*", "/api/camions/*").hasRole("ADMIN")
                 .requestMatchers(HttpMethod.DELETE, "/api/bacs/*", "/api/zones/*", "/api/camions/*").hasRole("ADMIN")
@@ -91,23 +96,45 @@ public class SecurityConfig {
                 .passwordParameter("motDePasse")
                 .successHandler((req, res, auth) -> {
                     limiteur.enregistrerSucces(req.getParameter("email"));
+                    tracer(audit, req, auth, LibellesAudit.CONNEXION, 200);
                     ecrire(res, mapper, 200, new MessageDto("Connecté"));
                 })
                 .failureHandler((req, res, ex) -> {
                     // un compte inactif a fourni le bon mot de passe : ce n'est pas du devinage
                     if (!(ex instanceof DisabledException)) limiteur.enregistrerEchec(req.getParameter("email"));
+                    tracer(audit, req, null, LibellesAudit.ECHEC_CONNEXION, 401);
                     ecrire(res, mapper, 401, ErreurApi.de(401, messageEchec(ex)));
                 })
                 .permitAll())
             .logout(l -> l
                 .logoutUrl("/api/auth/deconnexion")
                 .deleteCookies("JSESSIONID")
-                .logoutSuccessHandler((req, res, auth) -> ecrire(res, mapper, 200, new MessageDto("Déconnecté"))))
+                .logoutSuccessHandler((req, res, auth) -> {
+                    tracer(audit, req, auth, LibellesAudit.DECONNEXION, 200);
+                    ecrire(res, mapper, 200, new MessageDto("Déconnecté"));
+                }))
             .headers(h -> h.contentSecurityPolicy(csp -> csp.policyDirectives(
                 "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; "
                         + "img-src 'self' data: https://tile.openstreetmap.org; connect-src 'self'; "
                         + "frame-ancestors 'none'; base-uri 'self'; form-action 'self'")));
         return http.build();
+    }
+
+    /** Inscrit une connexion, un échec de connexion ou une déconnexion au journal d'audit. */
+    private static void tracer(ObjectProvider<JournalAuditService> audit, HttpServletRequest req,
+                               Authentication auth, String action, int statut) {
+        JournalAuditService journal = audit.getIfAvailable();
+        if (journal == null) return;
+        Long id = null;
+        String email = null;
+        if (auth != null && auth.getPrincipal() instanceof UtilisateurDetails u) {
+            id = u.getId();
+            email = u.getUsername();
+        } else if (req.getParameter("email") != null) { // échec : l'adresse saisie (tronquée), compte inconnu ou non
+            String saisie = req.getParameter("email").trim();
+            email = saisie.length() > 200 ? saisie.substring(0, 200) : saisie;
+        }
+        journal.enregistrer(id, email, action, req.getMethod(), req.getRequestURI(), statut, req.getRemoteAddr());
     }
 
     private static String messageEchec(AuthenticationException ex) {
