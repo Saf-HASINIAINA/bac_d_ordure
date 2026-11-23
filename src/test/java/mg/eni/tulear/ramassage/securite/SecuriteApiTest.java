@@ -86,6 +86,13 @@ class SecuriteApiTest {
     }
 
     @Test
+    void lesPagesPubliquesRestentAccessiblesSansConnexion() throws Exception {
+        for (String page : List.of("/login.html", "/inscription.html", "/mot-de-passe-oublie.html")) {
+            mvc.perform(get(page)).andExpect(status().isOk());
+        }
+    }
+
+    @Test
     void apiSansConnexionNeRedirigeJamaisMemeAvecAcceptHtml() throws Exception {
         mvc.perform(get("/api/bacs").accept(MediaType.TEXT_HTML))
                 .andExpect(status().isUnauthorized());

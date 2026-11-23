@@ -25,7 +25,7 @@ import java.nio.charset.StandardCharsets;
 
 /**
  * Sécurité de l'application : connexion par session (cookie), protection CSRF, droits par rôle.
- * Les pages publiques sont uniquement login.html et inscription.html ; tout le reste exige une connexion.
+ * Les pages publiques sont uniquement login.html, inscription.html et mot-de-passe-oublie.html ; tout le reste exige une connexion.
  */
 @Configuration
 @EnableWebSecurity
@@ -40,7 +40,7 @@ public class SecurityConfig {
     public SecurityFilterChain chaineDeSecurite(HttpSecurity http, ObjectMapper mapper) throws Exception {
         http
             .authorizeHttpRequests(a -> a
-                .requestMatchers("/login.html", "/inscription.html", "/css/**", "/js/**", "/vendor/**",
+                .requestMatchers("/login.html", "/inscription.html", "/mot-de-passe-oublie.html", "/css/**", "/js/**", "/vendor/**",
                         "/favicon.ico", "/error").permitAll()
                 .requestMatchers(HttpMethod.POST, "/api/auth/inscription").permitAll()
                 // ----- administrateur seul -----
