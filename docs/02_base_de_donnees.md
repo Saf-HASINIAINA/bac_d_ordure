@@ -36,5 +36,7 @@ spring.jpa.hibernate.ddl-auto=validate   # Hibernate vérifie, ne modifie JAMAIS
 La RLS est activée sans politique sur toutes les tables : l'API REST publique de Supabase
 ne voit rien, seul le backend (connexion JDBC) accède aux données.
 
-## 5. Tables (10)
-`zone`, `utilisateur`, `camion`, `bac`, `capteur`, `mesure`, `tournee`, `collecte`, `alerte`, `parametre`
+## 5. Tables (11)
+`zone`, `utilisateur`, `camion`, `bac`, `capteur`, `mesure`, `tournee`, `collecte`, `alerte`, `parametre`, `journal_audit`
+
+`journal_audit` (migration `20261123100000_journal_audit.sql`) : date, utilisateur (sans clé étrangère, pour que l'historique survive à un compte supprimé), e-mail, action, méthode, chemin, statut, adresse IP. **Après une mise à jour du code, appliquer cette migration (`npx supabase db push`) avant de relancer l'application** : Hibernate est en mode `validate` et refuse de démarrer si la table manque.

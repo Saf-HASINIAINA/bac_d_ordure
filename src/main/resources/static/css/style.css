@@ -181,6 +181,7 @@ input {
 .deux-colonnes { display: grid; grid-template-columns: 1fr 1fr; gap: .8rem; }
 .auth-lien { margin: 0; text-align: center; font-size: .9rem; color: var(--texte-doux); }
 .auth-lien a { color: var(--accent); }
+.barre-audit { margin-top: .8rem; align-items: center; }
 .actions-ligne { display: flex; gap: .4rem; flex-wrap: wrap; }
 .lien-discret { color: var(--accent); font-size: .85rem; justify-self: start; }
 .aide { margin: 0; font-size: .8rem; color: var(--texte-doux); }
