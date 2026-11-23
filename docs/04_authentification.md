@@ -7,7 +7,7 @@
 - **Protection CSRF** : le serveur dépose un cookie `XSRF-TOKEN` ; tout appel autre que GET doit renvoyer sa valeur
   dans l'en-tête `X-XSRF-TOKEN` (le tableau de bord le fait automatiquement).
 - **En-têtes de sécurité** dont une politique CSP (scripts uniquement locaux, tuiles de carte OpenStreetMap autorisées).
-- Seules `login.html` et `inscription.html` sont publiques. Sans connexion, l'API répond 401 et les pages redirigent vers `login.html`.
+- Seules `login.html`, `inscription.html` et `mot-de-passe-oublie.html` (consignes statiques) sont publiques. Sans connexion, l'API répond 401 et les pages redirigent vers `login.html`.
 
 ## Inscription et validation des comptes
 L'inscription publique (`POST /api/auth/inscription`, page `inscription.html`) crée toujours un **chauffeur inactif** :
