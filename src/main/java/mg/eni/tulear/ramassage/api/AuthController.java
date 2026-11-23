@@ -33,11 +33,12 @@ public class AuthController {
     public MessageDto changerMotDePasse(@Valid @RequestBody ChangerMotDePasseRequest requete,
                                         @AuthenticationPrincipal UtilisateurDetails moi) {
         utilisateurService.changerMotDePasse(moi.getId(), requete.ancienMotDePasse(), requete.nouveauMotDePasse());
+        moi.setMdpAChanger(false); // la session en cours n'est plus restreinte
         return new MessageDto("Mot de passe modifié.");
     }
 
     @GetMapping("/moi")
     public MoiDto moi(@AuthenticationPrincipal UtilisateurDetails moi) {
-        return new MoiDto(moi.getId(), moi.getNom(), moi.getPrenom(), moi.getUsername(), moi.getRole());
+        return new MoiDto(moi.getId(), moi.getNom(), moi.getPrenom(), moi.getUsername(), moi.getRole(), moi.isMdpAChanger());
     }
 }

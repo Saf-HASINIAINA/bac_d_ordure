@@ -391,6 +391,10 @@ async function demarrer() {
     }
     return;
   }
+  if (etat.moi.mdpAChanger) { // mot de passe fixé par un administrateur : à remplacer avant tout
+    location.replace('/mot-de-passe.html?obligatoire=1');
+    return;
+  }
   afficherUtilisateurConnecte();
   creerLegende();
   if (peutGerer()) creerGraphique();

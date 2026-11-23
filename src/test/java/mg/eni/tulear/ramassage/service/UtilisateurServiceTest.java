@@ -180,4 +180,44 @@ class UtilisateurServiceTest {
         when(repository.findByEmailIgnoreCase(any())).thenReturn(Optional.empty());
         assertThrows(RessourceIntrouvableException.class, () -> service.reinitialiserParEmail("x@tulear.mg", "nouveau-mdp-2"));
     }
+
+    @Test
+    void unMotDePasseReinitialiseDoitEtreChangeALaConnexionSuivante() {
+        Chauffeur c = new Chauffeur("N", "P", "c@tulear.mg", encodeur.encode("oublie-mdp-1"), "P1");
+        when(repository.findById(4L)).thenReturn(Optional.of(c));
+        assertFalse(c.isMdpAChanger());
+
+        service.reinitialiserMotDePasse(4L, 1L);
+
+        assertTrue(c.isMdpAChanger());
+    }
+
+    @Test
+    void laReinitialisationDeSecoursImposeAussiUnChangement() {
+        Administrateur a = new Administrateur("N", "P", "admin@tulear.mg", "h");
+        when(repository.findByEmailIgnoreCase("admin@tulear.mg")).thenReturn(Optional.of(a));
+        service.reinitialiserParEmail("admin@tulear.mg", "nouveau-mdp-2");
+        assertTrue(a.isMdpAChanger());
+    }
+
+    @Test
+    void choisirSonMotDePasseLeveLObligation() {
+        Chauffeur c = new Chauffeur("N", "P", "c@tulear.mg", encodeur.encode("temporaire-1"), "P1");
+        c.imposerMotDePasse(c.getMotDePasseHache());
+        when(repository.findById(3L)).thenReturn(Optional.of(c));
+
+        service.changerMotDePasse(3L, "temporaire-1", "choisi-par-moi-2");
+
+        assertFalse(c.isMdpAChanger());
+    }
+
+    @Test
+    void uneInscriptionNEstPasForceeAChangerSonMotDePasse() {
+        when(repository.existsByEmailIgnoreCase(any())).thenReturn(false);
+        when(repository.saveAndFlush(any())).thenAnswer(i -> i.getArgument(0));
+        service.inscrire(inscription());
+        ArgumentCaptor<Utilisateur> capteur = ArgumentCaptor.forClass(Utilisateur.class);
+        verify(repository).saveAndFlush(capteur.capture());
+        assertFalse(capteur.getValue().isMdpAChanger());
+    }
 }

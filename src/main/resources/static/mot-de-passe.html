@@ -23,9 +23,10 @@
         <input type="password" id="confirmation" name="confirmation" autocomplete="new-password" required>
       </label>
       <p class="aide">Entre 8 et 72 caractères.</p>
+      <p class="aide" id="avis-obligatoire" hidden><strong>Votre mot de passe a été défini par un administrateur.</strong> Choisissez-en un nouveau, que vous seul connaîtrez, pour continuer.</p>
       <p class="message" id="message" role="alert" aria-live="assertive"></p>
       <button type="submit" class="bouton principal">Enregistrer</button>
-      <p class="auth-lien"><a href="/">Retour au tableau de bord</a></p>
+      <p class="auth-lien" id="lien-retour"><a href="/">Retour au tableau de bord</a></p>
     </form>
   </main>
   <script type="module" src="js/mot-de-passe.js"></script>

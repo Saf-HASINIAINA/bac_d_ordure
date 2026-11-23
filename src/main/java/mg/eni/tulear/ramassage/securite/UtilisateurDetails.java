@@ -21,9 +21,16 @@ public class UtilisateurDetails implements UserDetails {
     private final String motDePasseHache;
     private final Role role;
     private final boolean actif;
+    /** Modifiable : mis à jour dans la session dès que l'utilisateur a choisi son mot de passe. */
+    private volatile boolean mdpAChanger;
 
     public UtilisateurDetails(Long id, String nom, String prenom, String email,
                               String motDePasseHache, Role role, boolean actif) {
+        this(id, nom, prenom, email, motDePasseHache, role, actif, false);
+    }
+
+    public UtilisateurDetails(Long id, String nom, String prenom, String email,
+                              String motDePasseHache, Role role, boolean actif, boolean mdpAChanger) {
         this.id = id;
         this.nom = nom;
         this.prenom = prenom;
@@ -31,17 +38,20 @@ public class UtilisateurDetails implements UserDetails {
         this.motDePasseHache = motDePasseHache;
         this.role = role;
         this.actif = actif;
+        this.mdpAChanger = mdpAChanger;
     }
 
     public static UtilisateurDetails de(Utilisateur u) {
         return new UtilisateurDetails(u.getId(), u.getNom(), u.getPrenom(), u.getEmail(),
-                u.getMotDePasseHache(), u.getRole(), u.isActif());
+                u.getMotDePasseHache(), u.getRole(), u.isActif(), u.isMdpAChanger());
     }
 
     public Long getId() { return id; }
     public String getNom() { return nom; }
     public String getPrenom() { return prenom; }
     public Role getRole() { return role; }
+    public boolean isMdpAChanger() { return mdpAChanger; }
+    public void setMdpAChanger(boolean mdpAChanger) { this.mdpAChanger = mdpAChanger; }
 
     @Override public Collection<? extends GrantedAuthority> getAuthorities() {
         return List.of(new SimpleGrantedAuthority("ROLE_" + role.name()));
