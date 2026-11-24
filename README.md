@@ -45,7 +45,7 @@ la capacité du camion (RG3), puis les ordonne avec la stratégie choisie par `t
 Cycle d'une tournée : planifier -> démarrer -> confirmer la vidange de chaque bac -> terminer (ou annuler tant qu'elle est planifiée).
 
 ## API REST
-Les endpoints (bacs, alertes, tournées, statistiques) sont décrits dans [docs/03_api.md](docs/03_api.md).
+Les endpoints (bacs, alertes, tournées, statistiques) sont décrits dans [docs/03_api.md](docs/03_api.md). Documentation interactive (Swagger UI, administrateurs) : `/swagger-ui.html`.
 
 ## Rapports
 Réservés aux administrateurs et superviseurs : section « Rapport d'activité » du tableau de bord (période au choix, 30 derniers
