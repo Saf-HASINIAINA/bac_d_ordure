@@ -4,6 +4,8 @@
 
 Projet de fin d'année M1 — ENI Fianarantsoa. Java 17 / Spring Boot / PostgreSQL (Supabase), matériel simulé.
 
+**Application en ligne : https://ramassage-tulear.onrender.com** (hébergement gratuit Render). Le site s'endort après 15 minutes sans visite : le premier accès peut prendre une minute et la simulation des capteurs est à l'arrêt pendant la veille (voir `docs/07_deploiement.md`).
+
 ## Lancer l'application
 1. `cp .env.example .env` puis compléter `DB_URL` (Supabase > Connect > *Session pooler*) et `DB_PASSWORD`.
 2. Première fois seulement, pour créer zones, camions, bacs, capteurs et comptes de démo :
