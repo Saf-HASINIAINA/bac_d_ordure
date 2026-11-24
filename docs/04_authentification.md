@@ -69,6 +69,7 @@ section « Journal d'audit » du tableau de bord (25 lignes à la fois, « Voir 
 - Les consultations (GET), les actions refusées (403) et les erreurs (404, 409…) ne sont pas journalisées ; les échecs de connexion le sont.
 - Une panne du journal **ne fait jamais échouer** l'action de l'utilisateur (erreur écrite dans les logs).
 - Une nouvelle route non listée dans `LibellesAudit` est journalisée avec sa méthode et son modèle (`POST /api/xxx/{id}`).
+- **Purge** : `PurgeJournalAudit` supprime chaque jour les entrées de plus de `app.audit.retention-jours` jours (90 par défaut ; `0` désactive la purge), pour rester sous la limite de 500 Mo de Supabase. Elle est inscrite dans les logs.
 - Classes : `JournalAuditInterceptor` (modifications), `SecurityConfig` (connexions), `JournalAuditService`, `AuditController`.
 
 ## Limitation des essais de connexion
@@ -111,7 +112,7 @@ Les inscriptions publiques et les comptes de démonstration ne sont pas concern�
 Migration : `20261124100000_mdp_a_changer.sql` (appliquée par `./lancer.sh`).
 
 ## Limites connues
-- Le journal d'audit n'est pas inviolable (un administrateur de la base peut le modifier) et n'est pas purgé automatiquement.
+- Le journal d'audit n'est pas inviolable (un administrateur de la base peut le modifier) ; une entrée purgée est perdue (augmenter `app.audit.retention-jours` si la loi ou l'établissement exige plus de 90 jours).
 - Limitation des essais en mémoire, par adresse e-mail (pas par adresse IP) : un attaquant peut donc bloquer 15 minutes un compte connu, et le compteur repart à zéro au redémarrage. Suffisant pour une seule instance.
 - Pas de réinitialisation du mot de passe par e-mail (réinitialisation par un administrateur ou commande de secours). Le mot de passe temporaire n'est pas à changer obligatoirement à la première connexion.
 - Derrière HTTPS, activer `server.servlet.session.cookie.secure=true`.
