@@ -108,7 +108,27 @@ function creerLegende() {
 
 /* ---------- alertes ---------- */
 
+const TITRE_PAGE = document.title;
+
+/** Bandeau rouge en haut de page (et titre de l'onglet) tant qu'un risque d'incendie n'est pas traité. */
+function afficherBandeauIncendie(alertes) {
+  const bandeau = $('bandeau-incendie');
+  const bacs = [...new Set(alertes.filter((a) => a.type === 'RISQUE_INCENDIE').map((a) => a.bacCode ?? 'bac inconnu'))];
+  if (bacs.length === 0) {
+    bandeau.hidden = true;
+    document.title = TITRE_PAGE;
+    return;
+  }
+  const un = bacs.length === 1;
+  bandeau.textContent = `Risque d'incendie : ${un ? 'bac' : 'bacs'} ${bacs.join(', ')}. À traiter en priorité.`;
+  bandeau.hidden = false;
+  document.title = `(${bacs.length}) Incendie - ${TITRE_PAGE}`;
+}
+
 function afficherAlertes(alertes) {
+  alertes = [...alertes].sort((a, b) =>
+    (b.type === 'RISQUE_INCENDIE') - (a.type === 'RISQUE_INCENDIE')); // l'incendie d'abord, le reste garde son ordre
+  afficherBandeauIncendie(alertes);
   const compteur = $('nb-alertes');
   compteur.textContent = alertes.length;
   compteur.className = `compteur${alertes.length === 0 ? ' zero' : ''}`;

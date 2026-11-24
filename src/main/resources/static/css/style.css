@@ -87,7 +87,10 @@ main { max-width: 1400px; margin: 0 auto; padding: 16px; display: grid; gap: 16p
 
 .alertes { list-style: none; margin: 0; padding: 0; display: grid; gap: .5rem; max-height: 250px; overflow: auto; }
 .alerte { display: flex; justify-content: space-between; align-items: center; gap: .6rem; padding: .5rem .6rem; border: 1px solid var(--bordure); border-left: 4px solid var(--alerte); border-radius: 8px; }
-.alerte.incendie { border-left-color: var(--danger); }
+.alerte.incendie { border-left-color: var(--danger); background: rgba(214, 47, 47, .12); }
+.bandeau-incendie { background: var(--danger); color: #fff; font-weight: 700; padding: .7rem 1rem; border-radius: 8px; margin-bottom: 1rem; animation: pulsation 1.6s ease-in-out infinite; }
+@keyframes pulsation { 50% { opacity: .72; } }
+@media (prefers-reduced-motion: reduce) { .bandeau-incendie { animation: none; } }
 .alerte-titre { font-weight: 600; font-size: .88rem; }
 .alerte-detail { color: var(--texte-doux); font-size: .8rem; }
 .vide { color: var(--texte-doux); font-size: .9rem; margin: 0; }

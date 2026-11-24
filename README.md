@@ -34,7 +34,7 @@ s'inscrire, un administrateur valide ensuite son compte. Détails, droits par r�
 
 ## Tableau de bord
 Une fois connecté, http://localhost:8080/ affiche : carte des bacs (couleur selon le niveau), camions,
-trajet de la tournée choisie, indicateurs, alertes à traiter, planification et suivi des tournées.
+trajet de la tournée choisie, indicateurs, alertes à traiter (un risque d'incendie ouvre un bandeau rouge en haut de page et passe en tête de liste), planification et suivi des tournées.
 La page se met à jour toute seule toutes les 5 secondes. Le fond de carte OpenStreetMap demande une connexion Internet ;
 le reste fonctionne sans (Leaflet et Chart.js sont embarqués dans `static/vendor/`).
 
