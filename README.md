@@ -13,7 +13,7 @@ Projet de fin d'année M1 — ENI Fianarantsoa. Java 17 / Spring Boot / PostgreS
    l'application. Arguments Spring acceptés : `./lancer.sh --app.init-demo=true`. `SANS_MIGRATION=1 ./lancer.sh` saute la migration.
    Prérequis une seule fois : `npx supabase link --project-ref <REF>`. (`mvn spring-boot:run` seul reste possible, sans migration.)
 
-Avec Docker (base et application en une commande) : voir `docs/07_deploiement.md`.
+Avec Docker (base et application en une commande) ou sur un hébergeur gratuit (Render + Supabase) : voir `docs/07_deploiement.md`.
 
 Réglages de la simulation dans `src/main/resources/application.properties` (`simulation.*`) :
 intervalle des mesures (30 s par défaut, `--simulation.intervalle-ms=5000` pour une démo), accélération du temps,

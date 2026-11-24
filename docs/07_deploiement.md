@@ -60,3 +60,29 @@ Deux chemins existent, volontairement séparés :
 Un outil de migration intégré à l'application (Flyway ou Liquibase) a été écarté : il imposerait de renommer les fichiers,
 de déclarer la base Supabase actuelle comme déjà à jour et d'abandonner `supabase db push`, avec un risque sur la base réelle.
 **Évolution possible** : adopter Flyway, avec une ligne de base (`baselineOnMigrate`) posée sur la version actuelle du schéma.
+
+## 5. Hébergeur gratuit : Render + Supabase
+Architecture : l'application tourne dans un conteneur **Render** (offre gratuite, HTTPS fourni) et garde la base **Supabase**
+déjà utilisée en local. Le fichier `render.yaml` décrit le service ; il ne contient aucun secret.
+
+**Étapes (une fois, dans le navigateur)**
+1. Créer un compte sur render.com (connexion avec GitHub), puis *New > Blueprint*, choisir le dépôt `bac_d_ordure`.
+2. Render lit `render.yaml` et demande les trois valeurs secrètes : `DB_URL`, `DB_USER`, `DB_PASSWORD`. Les recopier depuis votre
+   `.env` local (Supabase > Connect > *Session pooler*). Ne pas les écrire ailleurs.
+3. *Apply* : Render construit l'image (5 à 10 minutes la première fois) puis donne une adresse `https://ramassage-tulear.onrender.com`.
+4. Les migrations restent appliquées depuis votre poste (`./lancer.sh` ou `npx supabase db push`) : l'hébergeur ne touche pas au schéma.
+   Les comptes de démonstration existent déjà dans la base Supabase, la connexion fonctionne donc telle quelle.
+
+**Ce que l'offre gratuite impose**
+- **Mise en veille après 15 minutes sans visite** : le premier accès suivant prend environ une minute (réveil + démarrage de Spring Boot).
+  **La simulation des capteurs est à l'arrêt pendant la veille** : les bacs ne se remplissent plus tant que personne n'ouvre le site.
+  Pour la démonstration, ouvrir le site 2 minutes avant. Un service de surveillance gratuit (ex. UptimeRobot, requête sur `/login.html`
+  toutes les 5 minutes) l'empêche de dormir ; l'offre gratuite offre 750 heures par mois, de quoi tenir un seul service 24 h/24.
+- 512 Mo de mémoire : la JVM est bornée (`JAVA_TOOL_OPTIONS` dans `render.yaml`).
+- Une seule instance (la limitation des essais de connexion est en mémoire) : ne pas augmenter le nombre d'instances.
+- **Ne pas** arrêter l'application locale et celle de Render en même temps sur la même base : les deux simulent et écrivent des mesures.
+  Une seule des deux doit tourner (sinon, `--simulation.actif=false` sur l'une).
+
+**Sécurité** : le cookie de session est réservé à HTTPS (`SERVER_SERVLET_SESSION_COOKIE_SECURE`), l'adresse IP du journal d'audit est
+celle du visiteur et non celle du proxy (`SERVER_FORWARD_HEADERS_STRATEGY=framework`). Changer le mot de passe des comptes de démonstration
+avant de communiquer l'adresse, et ne jamais publier le mot de passe de la base.
