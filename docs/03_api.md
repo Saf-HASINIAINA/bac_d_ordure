@@ -3,6 +3,8 @@
 Base : `http://localhost:8080/api` — réponses en JSON. **Toutes les routes exigent une connexion** (sauf inscription et connexion), et les écritures un jeton CSRF :
 voir [04_authentification.md](04_authentification.md) pour les droits par rôle.
 
+**Documentation interactive** : `/swagger-ui.html` (spécification OpenAPI brute : `/v3/api-docs`), générée automatiquement à partir des contrôleurs, donc toujours à jour. Réservée aux administrateurs. Les lectures (GET) s'essaient directement après connexion sur `/login.html` ; les écritures exigent l'en-tête `X-XSRF-TOKEN` (CSRF) que cette page n'ajoute pas : pour elles, utiliser l'application.
+
 ## Consultation
 | Méthode | URL | Description |
 |---|---|---|

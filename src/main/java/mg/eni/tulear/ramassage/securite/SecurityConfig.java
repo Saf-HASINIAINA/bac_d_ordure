@@ -66,6 +66,8 @@ public class SecurityConfig {
                 .requestMatchers(HttpMethod.POST, "/api/auth/inscription").permitAll()
                 // ----- administrateur seul -----
                 .requestMatchers("/api/utilisateurs/**", "/api/audit/**").hasRole("ADMIN")
+                // documentation interactive de l'API (Swagger UI) : réservée aux administrateurs
+                .requestMatchers("/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html").hasRole("ADMIN")
                 .requestMatchers(HttpMethod.POST, "/api/bacs", "/api/zones", "/api/camions").hasRole("ADMIN")
                 .requestMatchers(HttpMethod.PUT, "/api/bacs/*", "/api/zones/*", "/api/camions/*").hasRole("ADMIN")
                 .requestMatchers(HttpMethod.DELETE, "/api/bacs/*", "/api/zones/*", "/api/camions/*").hasRole("ADMIN")
